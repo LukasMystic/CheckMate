@@ -16,9 +16,16 @@ struct ContentView: View {
     var body: some View {
         Chessboard(chessboardModel: chessboardModel)
             .onMove { move, isLegal, from, to, lan, promotionPiece in
-                print ("Move: \(lan)")
+                print ("Move: Fen: \(chessboardModel.fen) - Lan: \(lan)")
+                
+                if !isLegal {
+                    print("Illegal Move: \(lan)")
+                    return
+                }
+                chessboardModel.game.make(move: move)
+                chessboardModel.setFen(FenSerialization.default.serialize(position: chessboardModel.game.position), lan: lan)
             }
-            .frame(width: 300, height: 300)
+            .frame(width: 400, height: 400)
     }
     
 }
