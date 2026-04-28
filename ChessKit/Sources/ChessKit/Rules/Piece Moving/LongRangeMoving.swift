@@ -22,7 +22,10 @@ class LongRangeMoving: RangeMoving {
     private func process(translation: (Int, Int), for square: Square, in position: Position) -> [Square] {
         var destinations = [Square]()
         
-        for offset in 1..<8 {
+   
+        let maxOffset = max(Board.columns, Board.rows)
+        
+        for offset in 1..<maxOffset {
             let destination = square.translate(file: translation.0 * offset, rank: translation.1 * offset)
             if !destination.isValid {
                 break

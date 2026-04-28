@@ -68,11 +68,11 @@ public class FenSerialization {
     private func fen(from board: Board) -> String {
         var lines: [String] = []
         
-        for rank in (0...7).reversed() {
+        for rank in (0..<Board.rows).reversed() {
             var empty = 0
             var line = ""
             
-            for file in 0...7 {
+            for file in 0..<Board.columns {
                 let square = Square(file: file, rank: rank)
                 
                 if let piece = board[square] {
@@ -101,7 +101,7 @@ public class FenSerialization {
     
     private func board(from sequence: String.SubSequence) -> Board {
         var board = Board()
-        var square = Square(file: 0, rank: 7)
+        var square = Square(file: 0, rank: Board.rows - 1)
         
         for c in sequence {
             if let piece = Piece(character: c)  {

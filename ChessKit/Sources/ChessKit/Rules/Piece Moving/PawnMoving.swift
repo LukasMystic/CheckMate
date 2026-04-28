@@ -32,7 +32,7 @@ class PawnMoving: PieceMoving {
     }
     
     private func twoSquareMoves(from square: Square, in position: Position) -> [Square] {
-        let initialRank = position.state.turn == .white ? 1 : 6
+        let initialRank = position.state.turn == .white ? 1 : (Board.rows - 2)
         guard square.rank == initialRank else {
             return []
         }
@@ -82,7 +82,7 @@ class PawnMoving: PieceMoving {
     }
     
     private func promotedMoves(from square: Square, in position: Position, destinations: [Square]) -> [Move] {
-        let promotionRank = position.state.turn == .white ? 7 : 0
+        let promotionRank = position.state.turn == .white ? (Board.rows - 1) : 0
         let promotions = destinations.filter { $0.rank == promotionRank }
         let destinations = destinations.filter { $0.rank != promotionRank }
 

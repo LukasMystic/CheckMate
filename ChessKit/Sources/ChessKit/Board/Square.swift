@@ -14,12 +14,10 @@ public struct Square: Hashable {
     
     /// Index of file of the square.
     public var file: Int {
-        self.index / Board.rankCoordinates.count
+        self.index / Board.rows // Use dynamic rows
     }
-    
-    /// Index of rank of the square.
     public var rank: Int {
-        self.index % Board.fileCoordinates.count
+        self.index % Board.columns // Use dynamic columns
     }
     
     /// Human readable coorsinate on the square.
@@ -67,7 +65,7 @@ public struct Square: Hashable {
      */
     public init(file: Int, rank: Int) {
         self.init(index: file * Board.rankCoordinates.count + rank)
-        self.isValid = (Int.zero...7).contains(file) && (Int.zero...7).contains(rank)
+        self.isValid = (0..<Board.columns).contains(file) && (0..<Board.rows).contains(rank)
     }
     
     /**

@@ -188,6 +188,7 @@ public class Game {
     }
     
     private func updateEnPassant(for move: Move) -> Square? {
+        if Board.rows < 8 { return nil }
         if position.board.bitboards.pawn & move.from.bitboardMask == Int64.zero {
             return nil
         }
@@ -210,12 +211,6 @@ public class Game {
         }
         
         self.position.state.castlings = self.position.state.castlings.filter {
-            // filter should return true if we should not exclude
-            // filter should return false if we should exclude current castling
-            // $0 is one of KQkq pieces (white K, white Q, black k, black q)
-            // castlingColorAndSideToExclude returns piece if move from/to is at some of 4 corners
-            // if castlingColorAndSideToExclude returns piece
-            // for either "from" or for "to" square - we have to exclude casling
             var excludeBecauseOfFrom = false
             var excludeBecauseOfTo = false
             if let colorAndSideToExclude = castlingColorAndSideToExclude(square: move.from) {
@@ -229,22 +224,13 @@ public class Game {
     }
     
     private func castlingColorAndSideToExclude(square: Square) -> Piece? {
-        // is A1?
-        if square.file == 0 && square.rank == 0 {
-            return Piece(kind: .queen, color: .white)
-        }
-        // is H1?
-        if square.file == 7 && square.rank == 0 {
-            return Piece(kind: .king, color: .white)
-        }
-        // is A8?
-        if square.file == 0 && square.rank == 7 {
-            return Piece(kind: .queen, color: .black)
-        }
-        // is H8?
-        if square.file == 7 && square.rank == 7 {
-            return Piece(kind: .king, color: .black)
-        }
+        let maxFile = Board.columns - 1
+        let maxRank = Board.rows - 1
+        
+        if square.file == 0 && square.rank == 0 { return Piece(kind: .queen, color: .white) }
+        if square.file == maxFile && square.rank == 0 { return Piece(kind: .king, color: .white) }
+        if square.file == 0 && square.rank == maxRank { return Piece(kind: .queen, color: .black) }
+        if square.file == maxFile && square.rank == maxRank { return Piece(kind: .king, color: .black) }
         return nil
     }
     

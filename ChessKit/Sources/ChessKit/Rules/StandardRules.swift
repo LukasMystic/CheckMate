@@ -39,16 +39,14 @@ public class StandardRules: Rules {
             return true
         }
         
-        let kingRays: Bitboard! = self.rays.cross[kingSquare.bitboardMask]
         
-        if (kingRays & (bitboards.rook | bitboards.queen) & bitboards.bitboard(for: position.state.turn.negotiated) != Bitboard.zero) && self.isLongCheck(kingSquare: kingSquare,
-                            turn: position.state.turn,
-                            translations: MovingTranslations.default.cross,
-                            bitboards: bitboards,
-                            pieces: bitboards.queen | bitboards.rook) {
-            return true
-        }
-        
+                if self.isLongCheck(kingSquare: kingSquare,
+                                    turn: position.state.turn,
+                                    translations: MovingTranslations.default.cross,
+                                    bitboards: bitboards,
+                                    pieces: bitboards.queen | bitboards.rook) {
+                    return true
+                }
         for translation in MovingTranslations.default.knight {
             let destination = kingSquare.translate(file: translation.0, rank: translation.1)
             guard destination.isValid else {
@@ -79,12 +77,11 @@ public class StandardRules: Rules {
                              bitboards: Bitboards,
                              pieces: Bitboard) -> Bool {
         for translation in translations {
-            for offset in 1..<8 {
+            let maxOffset = max(Board.columns, Board.rows)
+
+            for offset in 1..<maxOffset {
                 let destination = kingSquare.translate(file: translation.0 * offset,
                                                        rank: translation.1 * offset)
-                guard destination.isValid else {
-                    break
-                }
                 if bitboards.bitboard(for: turn) & destination.bitboardMask != Int64.zero {
                     break
                 }
@@ -169,7 +166,7 @@ public class StandardRules: Rules {
             nextPosition.board[move.to] = nextPosition.board[move.from]
             nextPosition.board[move.from] = nil
             
-            // if move is en passant capture - remove captured pawn from board
+           
             if let enPassantCapturedPawn = self.squareOfEnPassantCapturedPawn(move: move, position: position) {
                 nextPosition.board[enPassantCapturedPawn] = nil
             }
@@ -189,7 +186,9 @@ public class StandardRules: Rules {
             return nil
         }
         if move.to.file == enPassant.file && move.to.rank == enPassant.rank {
-            return Square(file: enPassant.file, rank: enPassant.rank == 2 ? 3 : 4)
+            
+            let capturedRank = enPassant.rank < (Board.rows / 2) ? enPassant.rank + 1 : enPassant.rank - 1
+            return Square(file: enPassant.file, rank: capturedRank)
         }
         return nil
     }

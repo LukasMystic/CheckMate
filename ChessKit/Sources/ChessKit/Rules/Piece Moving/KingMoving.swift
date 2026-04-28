@@ -31,8 +31,9 @@ class KingMoving: ShortRangeMoving {
     }
     
     private func castlingSquares(in position: Position) -> [Square] {
+        guard Board.columns == 8 && Board.rows == 8 else { return [] }
+
         let castlings = position.state.castlings.filter { $0.color == position.state.turn }
-        
         var squares = [Square]()
 
         let rank = position.state.turn == .white ? 0 : 7

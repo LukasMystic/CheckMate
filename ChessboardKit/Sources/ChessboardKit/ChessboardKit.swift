@@ -41,11 +41,15 @@ public struct BoardSquare: Identifiable, Hashable {
 
 @Observable
 public class ChessboardModel {
-    public var fen: String {
-        get { FenSerialization.default.serialize(position: game.position) }
-        set { game = Game(position: FenSerialization.default.deserialize(fen: newValue)) }
-    }
     
+    
+    public var rows: Int
+        public var columns: Int
+
+        public var fen: String {
+            get { FenSerialization.default.serialize(position: game.position) }
+            set { game = Game(position: FenSerialization.default.deserialize(fen: newValue)) }
+        }
     public var size: CGFloat = 0
     
     public var colorScheme: ChessboardColorScheme = .light
@@ -80,17 +84,21 @@ public class ChessboardModel {
     public var movingPiece: (piece: Piece, from: BoardSquare, to: BoardSquare)?
     
     public init(fen: String = EMPTY_FEN,
-                perspective: PieceColor = .white,
-                colorScheme: ChessboardColorScheme = .light,
-                allowOpponentMove: Bool = false,
-                highlightLegalMoves: Bool = true)
-    {
-        self.game = Game(position: FenSerialization.default.deserialize(fen: fen))
-        self.perspective = perspective
-        self.colorScheme = colorScheme
-        self.allowOpponentMove = allowOpponentMove
-        self.highlightLegalMoves = highlightLegalMoves
-    }
+                    perspective: PieceColor = .white,
+                    colorScheme: ChessboardColorScheme = .light,
+                    allowOpponentMove: Bool = false,
+                    highlightLegalMoves: Bool = true,
+                    rows: Int = 8,       // default 8
+                    columns: Int = 8)    // default 8
+        {
+            self.rows = rows
+            self.columns = columns
+            self.game = Game(position: FenSerialization.default.deserialize(fen: fen))
+            self.perspective = perspective
+            self.colorScheme = colorScheme
+            self.allowOpponentMove = allowOpponentMove
+            self.highlightLegalMoves = highlightLegalMoves
+        }
     
     public var onMove: (Move, Bool, String, String, String, PieceKind? ) -> Void = { _, _, _, _, _, _ in }
     
@@ -123,15 +131,13 @@ public class ChessboardModel {
     }
     
     public func updateLegalMoveHighlights(for square: BoardSquare) {
-        guard highlightLegalMoves else {
+            guard highlightLegalMoves else {
+                legalMoveSquares.removeAll()
+                return
+            }
             legalMoveSquares.removeAll()
-            return
-        }
-        
-        legalMoveSquares.removeAll()
-        
-        let index = square.row + square.column * 8
-        guard game.position.board[index] != nil else { return }
+            let index = square.row + square.column * self.rows
+            guard game.position.board[index] != nil else { return }
         
         for move in game.legalMoves {
             if move.from.rank == square.row && move.from.file == square.column {
@@ -313,18 +319,26 @@ private struct MovingPieceView: View {
     var body: some View {
         Group {
             if let movingPiece = chessboardModel.movingPiece {
+            
+                let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
+                let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
+                
                 ChessPieceView(animation: animation,
                                piece: movingPiece.piece,
                                square: BoardSquare(row: movingPiece.from.row, column: movingPiece.from.column),
                                isMovingPiece: true)
                 .position(position)
                 .onAppear {
-                    position = CGPoint(x: chessboardModel.size / 16 + chessboardModel.size / 8 * CGFloat(chessboardModel.shouldFlipBoard ? 7 - movingPiece.from.column : movingPiece.from.column),
-                                       y: chessboardModel.size / 16 + chessboardModel.size / 8 * CGFloat(chessboardModel.shouldFlipBoard ? movingPiece.from.row : 7 - movingPiece.from.row))
+                    position = CGPoint(
+                        x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - movingPiece.from.column : movingPiece.from.column),
+                        y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? movingPiece.from.row : (chessboardModel.rows - 1) - movingPiece.from.row)
+                    )
                     
                     withAnimation(.easeInOut(duration: 0.5)) {
-                        position = CGPoint(x: chessboardModel.size / 16 + chessboardModel.size / 8 * CGFloat(chessboardModel.shouldFlipBoard ? 7 - movingPiece.to.column : movingPiece.to.column),
-                                           y: chessboardModel.size / 16 + chessboardModel.size / 8 * CGFloat(chessboardModel.shouldFlipBoard ? movingPiece.to.row : 7 - movingPiece.to.row))
+                        position = CGPoint(
+                            x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - movingPiece.to.column : movingPiece.to.column),
+                            y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? movingPiece.to.row : (chessboardModel.rows - 1) - movingPiece.to.row)
+                        )
                     } completion: {
                         chessboardModel.movingPiece = nil
                     }
@@ -396,174 +410,198 @@ public struct Chessboard: View {
     }
     
     var promotionPickerView: some View {
-        ZStack {
-            Color.white.opacity(0.5)
-                .ignoresSafeArea()
-            
-            VStack(spacing: 24) {
-                HStack(spacing: 20) {
-                    ForEach(["q", "r", "b", "n"], id: \.self) { (piece: String) in
-                        Button {
-                            guard let sourceSquare = chessboardModel.promotionSourceSquare,
-                                  let targetSquare = chessboardModel.promotionTargetSquare,
-                                  let lan = chessboardModel.promotionLan
-                            else {
+            ZStack {
+
+                let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
+                let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
+                
+                let buttonSize = min(sqWidth, sqHeight)
+                
+                Color.white.opacity(0.5)
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 24) {
+                    HStack(spacing: 20) {
+                        ForEach(["q", "r", "b", "n"], id: \.self) { (piece: String) in
+                            Button {
+                                guard let sourceSquare = chessboardModel.promotionSourceSquare,
+                                      let targetSquare = chessboardModel.promotionTargetSquare,
+                                      let lan = chessboardModel.promotionLan
+                                else {
+                                    chessboardModel.absentePromotionPicker()
+                                    return
+                                }
+                                
+                                let promotedLan = lan + piece.uppercased()
+                                let promotedMove = Move(string: promotedLan)
+                                let isLegal = chessboardModel.game.legalMoves.contains(promotedMove)
+                                
+                                chessboardModel.onMove(promotedMove, isLegal, sourceSquare, targetSquare, promotedLan, PieceKind(rawValue: piece))
+                                
                                 chessboardModel.absentePromotionPicker()
-                                return
-                            }
-                            
-                            let promotedLan = lan + piece.uppercased()
-                            let promotedMove = Move(string: promotedLan)
-                            let isLegal = chessboardModel.game.legalMoves.contains(promotedMove)
-                            
-                            chessboardModel.onMove(promotedMove, isLegal, sourceSquare, targetSquare, promotedLan, PieceKind(rawValue: piece))
-                            
-                            chessboardModel.absentePromotionPicker()
-                        } label: {
-                            let imageName = "\(chessboardModel.perspective == PieceColor.white ? "w" : "b")\(String(describing: piece).uppercased())"
-                            
-                            ZStack {
-                                AsyncImage(url: Bundle.module.url(forResource: imageName, withExtension: "png")) { phase in
-                                    if let image = phase.image {
-                                        image
-                                            .resizable()
-                                            .frame(width: chessboardModel.size / 8,
-                                                    height: chessboardModel.size / 8)
-                                            .contentShape(Rectangle())
-                                    } else if phase.error != nil {
-                                        Text("\(piece)")
-                                            .foregroundStyle(piece == "w" ? Color.white : Color.black)
-                                            .font(.system(size: 18))
-                                            .scaledToFit()
-                                            .contentShape(Rectangle())
-                                    } else {
-                                        ProgressView()
-                                            .scaleEffect(0.85)
+                            } label: {
+                                let imageName = "\(chessboardModel.perspective == PieceColor.white ? "w" : "b")\(String(describing: piece).uppercased())"
+                                
+                                ZStack {
+                                    AsyncImage(url: Bundle.module.url(forResource: imageName, withExtension: "png")) { phase in
+                                        if let image = phase.image {
+                                            image
+                                                .resizable()
+                                                // 3. Apply the dynamic size here!
+                                                .frame(width: buttonSize, height: buttonSize)
+                                                .contentShape(Rectangle())
+                                        } else if phase.error != nil {
+                                            Text("\(piece)")
+                                                .foregroundStyle(piece == "w" ? Color.white : Color.black)
+                                                .font(.system(size: 18))
+                                                .scaledToFit()
+                                                .contentShape(Rectangle())
+                                        } else {
+                                            ProgressView()
+                                                .scaleEffect(0.85)
+                                        }
                                     }
                                 }
+                                .padding(5)
                             }
-                            .padding(5)
+                            .background(.white)
+                            .cornerRadius(12)
                         }
-                        .background(.white)
-                        .cornerRadius(12)
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
+                .padding()
+                .background(.ultraThinMaterial)
+                .cornerRadius(20)
+                .shadow(radius: 5)
+                .padding(.horizontal, 20)
             }
-            .padding()
-            .background(.ultraThinMaterial)
-            .cornerRadius(20)
-            .shadow(radius: 5)
-            .padding(.horizontal, 20)
         }
-    }
     
     var backgroundView: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 8), spacing: 0) {
-            ForEach(0..<64) { index in
-                let row = index / 8
-                let column = index % 8
-                let isLightSquare = (row + column) % 2 == 0
-                
-                Rectangle()
-                    .fill(isLightSquare ? chessboardModel.colorScheme.light : chessboardModel.colorScheme.dark)
-                    .frame(width: chessboardModel.size / 8, height: chessboardModel.size / 8)
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: chessboardModel.columns), spacing: 0) {
+                ForEach(0..<(chessboardModel.rows * chessboardModel.columns), id: \.self) { index in
+                    let row = index / chessboardModel.columns
+                    let column = index % chessboardModel.columns
+                    let isLightSquare = (row + column) % 2 == 0
+                    
+                    Rectangle()
+                    // background colour for board
+                        .fill(isLightSquare ? chessboardModel.colorScheme.light : chessboardModel.colorScheme.dark)
+                        .frame(width: chessboardModel.size / CGFloat(chessboardModel.columns),
+                               height: chessboardModel.size / CGFloat(chessboardModel.rows))
+                }
             }
         }
-    }
     
     var labelsView: some View {
-        ZStack {
-            ForEach(0..<8) { row in
-                rowLabelView(row: row)
-            }
-            
-            ForEach(0..<8) { column in
-                columnLabelView(column: column)
+            ZStack {
+                ForEach(0..<chessboardModel.rows, id: \.self) { row in
+                    rowLabelView(row: row)
+                }
+                ForEach(0..<chessboardModel.columns, id: \.self) { column in
+                    columnLabelView(column: column)
+                }
             }
         }
-    }
-    
-    func rowLabelView(row: Int) -> some View {
-        let displayRow = chessboardModel.shouldFlipBoard ? (7 - row) : row
-        let labelSize = chessboardModel.size / 32
-        let squareSize = chessboardModel.size / 8
+
+        func rowLabelView(row: Int) -> some View {
+            let displayRow = chessboardModel.shouldFlipBoard ? (chessboardModel.rows - 1 - row) : row
+            let labelSize = chessboardModel.size / 32
+            let squareHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
+            
+            return Text("\(displayRow + 1)")
+                .font(.system(size: labelSize))
+                .foregroundColor(chessboardModel.colorScheme.label)
+                .frame(width: labelSize, height: squareHeight, alignment: .center)
+                .position(
+                    x: labelSize / 2 + 2,
+                    y: chessboardModel.size - (CGFloat(row) * squareHeight + squareHeight - 10)
+                )
+        }
         
-        return Text("\(displayRow + 1)")
-            .font(.system(size: labelSize))
-            .foregroundColor(chessboardModel.colorScheme.label)
-            .frame(width: labelSize, height: squareSize, alignment: .center)
-            .position(
-                x: labelSize / 2 + 2,
-                y: chessboardModel.size - (CGFloat(row) * squareSize + squareSize - 10)
-            )
-    }
-    
-    func columnLabelView(column: Int) -> some View {
-        let displayColumn = chessboardModel.shouldFlipBoard ? 7 - column : column
-        let labelSize = chessboardModel.size / 32
-        let squareSize = chessboardModel.size / 8
-        
-        return Text(["a", "b", "c", "d", "e", "f", "g", "h"][displayColumn])
-            .font(.system(size: labelSize))
-            .foregroundColor(chessboardModel.colorScheme.label)
-            .frame(width: squareSize, height: labelSize, alignment: .center)
-            .position(
-                x: (CGFloat(column) * squareSize + squareSize) - 8,
-                y: (chessboardModel.size - labelSize / 2) - 4
-            )
-    }
+        func columnLabelView(column: Int) -> some View {
+            let displayColumn = chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1 - column) : column
+            let labelSize = chessboardModel.size / 32
+            let squareWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
+            let letters = Array("abcdefghijklmnopqrstuvwxyz")
+            
+            return Text(String(letters[displayColumn]))
+                .font(.system(size: labelSize))
+                .foregroundColor(chessboardModel.colorScheme.label)
+                .frame(width: squareWidth, height: labelSize, alignment: .center)
+                .position(
+                    x: (CGFloat(column) * squareWidth + squareWidth) - 8,
+                    y: (chessboardModel.size - labelSize / 2) - 4
+                )
+        }
     
     var squaresView: some View {
-        ZStack {
-            ForEach(0..<64, id: \.self) { index in
-                let row = index % 8
-                let column = index / 8
-                let piece = chessboardModel.game.position.board[index]
+            ZStack {
+                let totalSquares = chessboardModel.rows * chessboardModel.columns
+                let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
+                let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
                 
-                ChessSquareView(piece: piece,
-                                row: row,
-                                column: column)
-                .position(x: chessboardModel.size / 16 + chessboardModel.size / 8 * CGFloat(chessboardModel.shouldFlipBoard ? 7 - column : column),
-                          y: chessboardModel.size / 16 + chessboardModel.size / 8 * CGFloat(chessboardModel.shouldFlipBoard ? row : 7 - row))
+                ForEach(0..<totalSquares, id: \.self) { index in
+                    let row = index % chessboardModel.rows
+                    let column = index / chessboardModel.rows
+                    let piece = chessboardModel.game.position.board[index]
+                    
+                    ChessSquareView(piece: piece, row: row, column: column)
+                    .position(
+                        x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - column : column),
+                       
+                        y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? row : (chessboardModel.rows - 1) - row)
+                    )
+                }
             }
         }
-    }
     
     var piecesView: some View {
-        ZStack {
-            ForEach(0..<64, id: \.self) { index in
-                let row = index % 8
-                let column = index / 8
-                let piece = chessboardModel.game.position.board[index]
+            ZStack {
+                let totalSquares = chessboardModel.rows * chessboardModel.columns
+                let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
+                let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
                 
-                let isMoving = chessboardModel.movingPiece?.from == BoardSquare(row: row, column: column) ||
-                               chessboardModel.movingPiece?.to == BoardSquare(row: row, column: column)
-                
-                ChessPieceView(animation: animation,
-                               piece: piece,
-                               square: BoardSquare(row: row, column: column))
-                .opacity(isMoving ? 0.0 : 1.0)
-                .animation(nil, value: isMoving)
-                .position(x: chessboardModel.size / 16 + chessboardModel.size / 8 * CGFloat(chessboardModel.shouldFlipBoard ? 7 - column : column),
-                          y: chessboardModel.size / 16 + chessboardModel.size / 8 * CGFloat(chessboardModel.shouldFlipBoard ? row : 7 - row))
+                ForEach(0..<totalSquares, id: \.self) { index in
+                    let row = index % chessboardModel.rows
+                    let column = index / chessboardModel.rows
+                    let piece = chessboardModel.game.position.board[index]
+                    
+                    let isMoving = chessboardModel.movingPiece?.from == BoardSquare(row: row, column: column) ||
+                                   chessboardModel.movingPiece?.to == BoardSquare(row: row, column: column)
+                    
+                    ChessPieceView(animation: animation,
+                                   piece: piece,
+                                   square: BoardSquare(row: row, column: column))
+                    .opacity(isMoving ? 0.0 : 1.0)
+                    .animation(nil, value: isMoving)
+                    .position(
+                        x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - column : column),
+                        y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? row : (chessboardModel.rows - 1) - row)
+                    )
+                }
             }
         }
-    }
     
     var legalMoveHighlightsView: some View {
-        ZStack {
-            ForEach(Array(chessboardModel.legalMoveSquares), id: \.id) { square in
-                Circle()
-                    .fill(chessboardModel.colorScheme.legalMove)
-                    .frame(width: chessboardModel.size / 24, height: chessboardModel.size / 24)
-                    .position(x: chessboardModel.size / 16 + chessboardModel.size / 8 * CGFloat(chessboardModel.shouldFlipBoard ? 7 - square.column : square.column),
-                              y: chessboardModel.size / 16 + chessboardModel.size / 8 * CGFloat(chessboardModel.shouldFlipBoard ? square.row : 7 - square.row))
+            ZStack {
+                let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
+                let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
+                let highlightSize = min(sqWidth, sqHeight) / 3
+                
+                ForEach(Array(chessboardModel.legalMoveSquares), id: \.id) { square in
+                    Circle()
+                        .fill(chessboardModel.colorScheme.legalMove)
+                        .frame(width: highlightSize, height: highlightSize)
+                        .position(
+                            x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - square.column : square.column),
+                            y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? square.row : (chessboardModel.rows - 1) - square.row)
+                        )
+                }
             }
+            .allowsHitTesting(false)
         }
-        .allowsHitTesting(false)
-    }
-    
     public func onMove(_ callback: @escaping (Move, Bool, String, String, String, PieceKind?) -> Void) -> Chessboard {
         chessboardModel.onMove = callback
         return self
@@ -593,20 +631,23 @@ private struct ChessSquareView: View {
         chessboardModel.hintedSquares.contains { $0.row == row && $0.column == column }
     }
     
+    var sqWidth: CGFloat { chessboardModel.size / CGFloat(chessboardModel.columns) }
+    var sqHeight: CGFloat { chessboardModel.size / CGFloat(chessboardModel.rows) }
+    
     var x: CGFloat {
-        chessboardModel.size / 16 + chessboardModel.size / 8 * CGFloat(chessboardModel.shouldFlipBoard ? 7 - column : column)
+        (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - column : column)
     }
     
     var y: CGFloat {
-        chessboardModel.size / 16 + chessboardModel.size / 8 * CGFloat(chessboardModel.shouldFlipBoard ? row : 7 - row)
+        (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? row : (chessboardModel.rows - 1) - row)
     }
     
     var body: some View {
         ZStack {
             Color.clear.contentShape(Rectangle())
         }
-        .font(.system(size: chessboardModel.size / 8 * 0.75))
-        .frame(width: chessboardModel.size / 8, height: chessboardModel.size / 8)
+        .font(.system(size: min(sqWidth, sqHeight) * 0.75))
+        .frame(width: sqWidth, height: sqHeight)
         .modifier {
             if let dropTarget = chessboardModel.dropTarget,
                !isDragging &&
@@ -656,12 +697,16 @@ private struct ChessPieceView: View {
         chessboardModel.hintedSquares.contains { $0.row == square.row && $0.column == square.column }
     }
     
+    // Dynamic Geometry Helpers
+    var sqWidth: CGFloat { chessboardModel.size / CGFloat(chessboardModel.columns) }
+    var sqHeight: CGFloat { chessboardModel.size / CGFloat(chessboardModel.rows) }
+    
     var x: CGFloat {
-        chessboardModel.size / 16 + chessboardModel.size / 8 * CGFloat(chessboardModel.shouldFlipBoard ? 7 - square.column : square.column)
+        (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - square.column : square.column)
     }
     
     var y: CGFloat {
-        chessboardModel.size / 16 + chessboardModel.size / 8 * CGFloat(chessboardModel.shouldFlipBoard ? square.row : 7 - square.row)
+        (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? square.row : (chessboardModel.rows - 1) - square.row)
     }
     
     var isMoving: Bool {
@@ -697,8 +742,8 @@ private struct ChessPieceView: View {
             }
         }
         .zIndex(zIndex)
-        .font(.system(size: chessboardModel.size / 8 * 0.75))
-        .frame(width: chessboardModel.size / 8, height: chessboardModel.size / 8)
+        .font(.system(size: min(sqWidth, sqHeight) * 0.75))
+        .frame(width: sqWidth, height: sqHeight)
         .offset(offset)
         .onTapGesture(perform: onTapGesture)
         .gesture(dragGesture)
@@ -735,7 +780,8 @@ private struct ChessPieceView: View {
             chessboardModel.deselect()
             chessboardModel.clearLegalMoveHighlights()
             
-            guard let selectedPiece = chessboardModel.game.position.board[selectedSquare.row + selectedSquare.column * 8]
+            // DYNAMIC UPDATE HERE: Swapped 8 for chessboardModel.rows
+            guard let selectedPiece = chessboardModel.game.position.board[selectedSquare.row + selectedSquare.column * chessboardModel.rows]
             else { return }
             
             let isPromotable = chessboardModel.isPromotable(piece: selectedPiece, lan: lan)
@@ -784,10 +830,8 @@ private struct ChessPieceView: View {
                 }
                 
                 isDragging = true
-                
-                let squareSize = chessboardModel.size / 8
-                let columnOffset = Int(round(value.translation.width / squareSize))
-                let rowOffset = Int(round(value.translation.height / squareSize))
+                let columnOffset = Int(round(value.translation.width / sqWidth))
+                let rowOffset = Int(round(value.translation.height / sqHeight))
                 
                 let targetColumn = chessboardModel.shouldFlipBoard ? square.column - columnOffset : square.column + columnOffset
                 let targetRow = chessboardModel.shouldFlipBoard ? square.row + rowOffset : square.row - rowOffset
@@ -809,9 +853,8 @@ private struct ChessPieceView: View {
                     return
                 }
                 
-                let squareSize = chessboardModel.size / 8
-                let columnOffset = Int(round(value.translation.width / squareSize))
-                let rowOffset = Int(round(value.translation.height / squareSize))
+                let columnOffset = Int(round(value.translation.width / sqWidth))
+                let rowOffset = Int(round(value.translation.height / sqHeight))
                 
                 let targetColumn = chessboardModel.shouldFlipBoard ? square.column - columnOffset : square.column + columnOffset
                 let targetRow = chessboardModel.shouldFlipBoard ? square.row + rowOffset : square.row - rowOffset
@@ -827,7 +870,7 @@ private struct ChessPieceView: View {
                     offset = .zero
                 }
                 
-                guard let selectedPiece = chessboardModel.game.position.board[square.row + square.column * 8]
+                guard let selectedPiece = chessboardModel.game.position.board[square.row + square.column * chessboardModel.rows]
                 else { return }
                 
                 let isPromotable = chessboardModel.isPromotable(piece: selectedPiece, lan: lan)

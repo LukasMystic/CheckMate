@@ -11,10 +11,20 @@ public struct Board: Hashable {
     
     internal var bitboards: Bitboards
     
-    internal static let fileCoordinates: [Character] = ["a", "b", "c", "d", "e", "f", "g", "h"]
-    internal static let rankCoordinates: [Character] = ["1", "2", "3", "4", "5", "6", "7", "8"]
+    public static var columns: Int = 8
+    public static var rows: Int = 8
+
+    internal static var fileCoordinates: [Character] {
+        let all: [Character] = ["a", "b", "c", "d", "e", "f", "g", "h"]
+        return Array(all.prefix(columns))
+    }
+    internal static var rankCoordinates: [Character] {
+        let all: [Character] = ["1", "2", "3", "4", "5", "6", "7", "8"]
+        return Array(all.prefix(rows))
+    }
     internal static var squaresCount: Int {
-        self.fileCoordinates.count * self.rankCoordinates.count
+        return self.columns * self.rows
+    
     }
     
     /**

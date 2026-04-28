@@ -9,28 +9,38 @@ import SwiftUI
 import ChessboardKit
 import ChessKit
 
-
 struct ContentView: View {
-    @State var chessboardModel = ChessboardModel (fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+    @State var chessboardModel: ChessboardModel
+    
+    init() {
+
+        Board.columns = 4
+        Board.rows = 4
+      
+        let puzzleFEN = "2kn/4/RP2/KB2 b - - 0 1"
+        
+        _chessboardModel = State(
+            initialValue: ChessboardModel(fen: puzzleFEN, rows: 4, columns: 4)
+        )
+    }
     
     var body: some View {
         Chessboard(chessboardModel: chessboardModel)
             .onMove { move, isLegal, from, to, lan, promotionPiece in
-                print ("Move: Fen: \(chessboardModel.fen) - Lan: \(lan)")
+                print("Move: Fen: \(chessboardModel.fen) - Lan: \(lan)")
                 
                 if !isLegal {
                     print("Illegal Move: \(lan)")
                     return
                 }
+                
                 chessboardModel.game.make(move: move)
                 chessboardModel.setFen(FenSerialization.default.serialize(position: chessboardModel.game.position), lan: lan)
             }
+            
             .frame(width: 400, height: 400)
     }
-    
 }
-
-
 
 #Preview {
     ContentView()
