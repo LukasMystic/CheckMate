@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1203D7052F9F532100211CCC /* ChessboardKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1203D7042F9F532100211CCC /* ChessboardKit */; };
-		1203D7082F9F543700211CCC /* ChessKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1203D7072F9F543700211CCC /* ChessKit */; };
+		D1AFE4642FA087C2000FC56A /* ChessKit in Frameworks */ = {isa = PBXBuildFile; productRef = D1AFE4632FA087C2000FC56A /* ChessKit */; };
+		D1AFE4672FA087C9000FC56A /* ChessboardKit in Frameworks */ = {isa = PBXBuildFile; productRef = D1AFE4662FA087C9000FC56A /* ChessboardKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,8 +28,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1203D7082F9F543700211CCC /* ChessKit in Frameworks */,
-				1203D7052F9F532100211CCC /* ChessboardKit in Frameworks */,
+				D1AFE4642FA087C2000FC56A /* ChessKit in Frameworks */,
+				D1AFE4672FA087C9000FC56A /* ChessboardKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,8 +72,8 @@
 			);
 			name = CheckMate;
 			packageProductDependencies = (
-				1203D7042F9F532100211CCC /* ChessboardKit */,
-				1203D7072F9F543700211CCC /* ChessKit */,
+				D1AFE4632FA087C2000FC56A /* ChessKit */,
+				D1AFE4662FA087C9000FC56A /* ChessboardKit */,
 			);
 			productName = CheckMate;
 			productReference = 1203D6F52F9F4CA600211CCC /* CheckMate.app */;
@@ -104,8 +104,8 @@
 			mainGroup = 1203D6EC2F9F4CA600211CCC;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				1203D7032F9F532100211CCC /* XCRemoteSwiftPackageReference "ChessboardKit" */,
-				1203D7062F9F543700211CCC /* XCRemoteSwiftPackageReference "ChessKit" */,
+				D1AFE4622FA087C2000FC56A /* XCLocalSwiftPackageReference "ChessKit" */,
+				D1AFE4652FA087C9000FC56A /* XCLocalSwiftPackageReference "ChessboardKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1203D6F62F9F4CA600211CCC /* Products */;
@@ -346,35 +346,25 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		1203D7032F9F532100211CCC /* XCRemoteSwiftPackageReference "ChessboardKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/rohanrhu/ChessboardKit.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.1.2;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		D1AFE4622FA087C2000FC56A /* XCLocalSwiftPackageReference "ChessKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ChessKit;
 		};
-		1203D7062F9F543700211CCC /* XCRemoteSwiftPackageReference "ChessKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/aperechnev/ChessKit";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.3.7;
-			};
+		D1AFE4652FA087C9000FC56A /* XCLocalSwiftPackageReference "ChessboardKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ChessboardKit;
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		1203D7042F9F532100211CCC /* ChessboardKit */ = {
+		D1AFE4632FA087C2000FC56A /* ChessKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 1203D7032F9F532100211CCC /* XCRemoteSwiftPackageReference "ChessboardKit" */;
-			productName = ChessboardKit;
-		};
-		1203D7072F9F543700211CCC /* ChessKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1203D7062F9F543700211CCC /* XCRemoteSwiftPackageReference "ChessKit" */;
 			productName = ChessKit;
+		};
+		D1AFE4662FA087C9000FC56A /* ChessboardKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ChessboardKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
