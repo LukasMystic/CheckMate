@@ -293,7 +293,7 @@ public class ChessboardModel {
         
         guard let row = Int(String(rowChar)) else { return false }
         
-        return row == (piece.color == .white ? 8 : 1)
+        return row == (piece.color == .white ? self.rows : 1)
     }
     
     public func beginWaiting() {
@@ -415,68 +415,74 @@ public struct Chessboard: View {
                 let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
                 let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
                 
-                let buttonSize = min(sqWidth, sqHeight)
+                let buttonSize = min(sqWidth, sqHeight) * 0.85
+                let pickerSpacing = buttonSize * 0.15
+                let pickerPadding = buttonSize * 0.25
                 
                 Color.white.opacity(0.5)
                     .ignoresSafeArea()
                 
-                VStack(spacing: 24) {
-                    HStack(spacing: 20) {
-                        ForEach(["q", "r", "b", "n"], id: \.self) { (piece: String) in
-                            Button {
-                                guard let sourceSquare = chessboardModel.promotionSourceSquare,
-                                      let targetSquare = chessboardModel.promotionTargetSquare,
-                                      let lan = chessboardModel.promotionLan
-                                else {
-                                    chessboardModel.absentePromotionPicker()
-                                    return
-                                }
+                VStack(spacing: pickerPadding) {
+                                Text("Promote Pawn")
+                                    .font(.system(size: buttonSize * 0.3, weight: .bold, design: .rounded))
+                                    .foregroundStyle(.secondary)
                                 
-                                let promotedLan = lan + piece.uppercased()
-                                let promotedMove = Move(string: promotedLan)
-                                let isLegal = chessboardModel.game.legalMoves.contains(promotedMove)
-                                
-                                chessboardModel.onMove(promotedMove, isLegal, sourceSquare, targetSquare, promotedLan, PieceKind(rawValue: piece))
-                                
-                                chessboardModel.absentePromotionPicker()
-                            } label: {
-                                let imageName = "\(chessboardModel.perspective == PieceColor.white ? "w" : "b")\(String(describing: piece).uppercased())"
-                                
-                                ZStack {
-                                    AsyncImage(url: Bundle.module.url(forResource: imageName, withExtension: "png")) { phase in
-                                        if let image = phase.image {
-                                            image
-                                                .resizable()
-                                                // 3. Apply the dynamic size here!
-                                                .frame(width: buttonSize, height: buttonSize)
-                                                .contentShape(Rectangle())
-                                        } else if phase.error != nil {
-                                            Text("\(piece)")
-                                                .foregroundStyle(piece == "w" ? Color.white : Color.black)
-                                                .font(.system(size: 18))
-                                                .scaledToFit()
-                                                .contentShape(Rectangle())
-                                        } else {
-                                            ProgressView()
-                                                .scaleEffect(0.85)
+                                HStack(spacing: pickerSpacing) {
+                                    ForEach(["q", "r", "b", "n"], id: \.self) { (piece: String) in
+                                        Button {
+                                            handlePromotion(to: piece)
+                                        } label: {
+                                            ZStack {
+                                                let imageName = "\(chessboardModel.perspective == PieceColor.white ? "w" : "b")\(piece.uppercased())"
+                                                
+                                                // Piece Icon
+                                                AsyncImage(url: Bundle.module.url(forResource: imageName, withExtension: "png")) { phase in
+                                                    if let image = phase.image {
+                                                        image
+                                                            .resizable()
+                                                            .scaledToFit()
+                                                            .frame(width: buttonSize * 0.8, height: buttonSize * 0.8)
+                                                    } else {
+                                                        ProgressView()
+                                                    }
+                                                }
+                                            }
+                                            .frame(width: buttonSize, height: buttonSize)
+                                            .background(Color(uiColor: .systemBackground))
+                                            .cornerRadius(buttonSize * 0.2)
+                                            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
                                         }
+                                        .buttonStyle(PlainButtonStyle())
                                     }
                                 }
-                                .padding(5)
                             }
-                            .background(.white)
-                            .cornerRadius(12)
+                            .padding(pickerPadding)
+                            .background(.ultraThinMaterial)
+                            .cornerRadius(buttonSize * 0.4)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: buttonSize * 0.4)
+                                    .stroke(.white.opacity(0.5), lineWidth: 1)
+                            )
+                            .shadow(radius: 20)
                         }
-                        .buttonStyle(.plain)
                     }
-                }
-                .padding()
-                .background(.ultraThinMaterial)
-                .cornerRadius(20)
-                .shadow(radius: 5)
-                .padding(.horizontal, 20)
-            }
-        }
+ 
+                    private func handlePromotion(to piece: String) {
+                        guard let sourceSquare = chessboardModel.promotionSourceSquare,
+                              let targetSquare = chessboardModel.promotionTargetSquare,
+                              let lan = chessboardModel.promotionLan
+                        else {
+                            chessboardModel.absentePromotionPicker()
+                            return
+                        }
+                        
+                        let promotedLan = lan + piece.uppercased()
+                        let promotedMove = Move(string: promotedLan)
+                        let isLegal = chessboardModel.game.legalMoves.contains(promotedMove)
+                        
+                        chessboardModel.onMove(promotedMove, isLegal, sourceSquare, targetSquare, promotedLan, PieceKind(rawValue: piece))
+                        chessboardModel.absentePromotionPicker()
+                    }
     
     var backgroundView: some View {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: chessboardModel.columns), spacing: 0) {
@@ -697,7 +703,6 @@ private struct ChessPieceView: View {
         chessboardModel.hintedSquares.contains { $0.row == square.row && $0.column == square.column }
     }
     
-    // Dynamic Geometry Helpers
     var sqWidth: CGFloat { chessboardModel.size / CGFloat(chessboardModel.columns) }
     var sqHeight: CGFloat { chessboardModel.size / CGFloat(chessboardModel.rows) }
     

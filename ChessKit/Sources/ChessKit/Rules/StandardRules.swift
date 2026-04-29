@@ -82,6 +82,8 @@ public class StandardRules: Rules {
             for offset in 1..<maxOffset {
                 let destination = kingSquare.translate(file: translation.0 * offset,
                                                        rank: translation.1 * offset)
+                
+                guard destination.isValid else { break }
                 if bitboards.bitboard(for: turn) & destination.bitboardMask != Int64.zero {
                     break
                 }
