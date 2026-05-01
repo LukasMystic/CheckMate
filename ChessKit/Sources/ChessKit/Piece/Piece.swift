@@ -55,6 +55,7 @@ public struct Piece: Hashable, CustomStringConvertible {
     public var description: String {
         let character = self.kind.rawValue
         return self.color == .white ? character.uppercased() : character.lowercased()
+        
     }
     
 }
