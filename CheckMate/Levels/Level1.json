@@ -1,0 +1,59 @@
+{
+  "id": 1,
+  "objective": "Find the Mate in 2 for White.",
+  "initialFEN": "KBrk/N1pp/qb2/1QR1 w - - 0 1",
+  "columns": 4,
+  "rows": 4,
+  "rootNode": {
+    "expectedMoves": {
+      "b1d3": {
+        "evaluation": "Brilliant!",
+        "feedback": "Brilliant! You sacrifice the Queen to lure the King into a mating net.",
+        "cpuReplyLAN": "d4d3",
+        "nextNode": {
+          "expectedMoves": {
+            "c1d1": {
+              "evaluation": "Best Move",
+              "feedback": "Checkmate! The Rook cuts off the d-file, and the Bishop and Knight cover escapes."
+            }
+          }
+        }
+      },
+      "b1a1": {
+        "evaluation": "Mistake",
+        "feedback": "The bishop captures your queen.",
+        "cpuReplyLAN": "b2a1"
+      },
+      "b1a2": {
+        "evaluation": "Mistake",
+        "feedback": "The bishop ignores your queen and takes your rook.",
+        "cpuReplyLAN": "b2c1"
+      },
+      "b1b2": {
+        "evaluation": "Mistake",
+        "feedback": "The pawn structure crushes your attack.",
+        "cpuReplyLAN": "c3b2"
+      },
+      "b1c2": {
+        "evaluation": "Mistake",
+        "feedback": "You blunder the queen to the pawn.",
+        "cpuReplyLAN": "d3c2"
+      },
+      "c1c2": {
+        "evaluation": "Mistake",
+        "feedback": "You drop the queen to the opponent's queen.",
+        "cpuReplyLAN": "a2b1"
+      },
+      "c1c3": {
+        "evaluation": "Mistake",
+        "feedback": "You drop the queen to the opponent's queen.",
+        "cpuReplyLAN": "a2b1"
+      },
+      "c1d1": {
+        "evaluation": "Mistake",
+        "feedback": "You drop the queen to the opponent's queen.",
+        "cpuReplyLAN": "a2b1"
+      }
+    }
+  }
+}

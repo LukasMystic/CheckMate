@@ -13,25 +13,55 @@ struct ContentView: View {
     @State var chessboardModel: ChessboardModel
     @State var fenHistory: [String]
     
+    // for puzzle
+    @State var currentLevel: PuzzleLevel
+    @State var currentNoce: PuzzleNode
+    @State var feedbacktext: String = "Find the best move for white"
+    @State var moveEvaluation: MoveEvaluation? = nil
+    
+    
     init() {
-
-        Board.columns = 4
-        Board.rows = 4
-      
-        let puzzleFEN = "KBrk/N1pp/qb2/1QR1 w - - 0 1"
+        
+        let level: PuzzleLevel
+        do{
+            level = try PuzzleLevel.load(fromBundle: "Level1")
+        }
+        catch{
+            fatalError("Could not load Level1.json: \(error)")
+        }
+        
+        
+        Board.columns = level.columns
+        Board.rows = level.rows
+        
+        _currentLevel = State(initialValue: level)
+        _currentNoce = State(initialValue: level.rootNode)
+        
+        _feedbacktext = State(initialValue: level.objective)
+        
         
         _chessboardModel = State(
-            initialValue: ChessboardModel(fen: puzzleFEN, rows: 4, columns: 4)
+            initialValue: ChessboardModel(fen: level.initialFEN, rows: level.rows, columns: level.columns)
         )
-        _fenHistory = State(initialValue: [puzzleFEN])
+        _fenHistory = State(initialValue: [level.initialFEN])
     }
     
     var body: some View {
         VStack{
+            
+            if let eval = moveEvaluation{
+                Text(eval.rawValue)
+                    .font(.title2).bold()
+                    .foregroundColor(eval == .brilliant || eval == .best ? .green : .red)
+                
+            }
+            Text(feedbacktext).padding()
+            
+            
             Button("Undo Move"){
                 undo()
             }
-            .padding()
+            .padding(.bottom)
             
             Chessboard(chessboardModel: chessboardModel)
                 .onMove { move, isLegal, from, to, lan, promotionPiece in
@@ -50,11 +80,52 @@ struct ContentView: View {
                     
                     // append to the state
                     fenHistory.append(newFen)
+                    
+                    evaluateMove(lan: lan)
                 }
                 
                 .frame(width: 400, height: 400)
         }
         }
+    
+    
+    private func evaluateMove(lan: String){
+        if let outcome = currentNoce.expectedMoves[lan]{
+            moveEvaluation = outcome.evaluation
+            feedbacktext = outcome.feedback
+            
+            if outcome.evaluation == .brilliant || outcome.evaluation == .best {
+                if let cpuLAN = outcome.cpuReplyLAN {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6)
+                    {
+                        // make cpu move from JSON
+                        let cpuMove = Move(string: cpuLAN)
+                        chessboardModel.game.make(move: cpuMove)
+                        let nextFEN = FenSerialization.default.serialize(position: chessboardModel.game.position)
+                        chessboardModel.setFen(nextFEN, lan: cpuLAN)
+                        fenHistory.append(nextFEN)
+                        
+                        if let next = outcome.nextNode {
+                            currentNoce = next
+                        }
+                        moveEvaluation = nil
+                        feedbacktext = "Find the next best move"
+                    }
+                }
+                
+            }
+            else {
+                feedbacktext += "\nUndo and try again."
+            }
+            
+        }
+        else {
+            moveEvaluation = .mistake
+            feedbacktext = "That's not the best move. Try again"
+            
+        }
+    }
+    
     private func undo() {
         guard let startFEN = fenHistory.first else {return}
         
@@ -71,7 +142,8 @@ struct ContentView: View {
         if let previousFEN = fenHistory.last {
             chessboardModel.setFen(previousFEN)
         }
-        
+        moveEvaluation =  nil
+        feedbacktext = currentLevel.objective
         
     }
 }
