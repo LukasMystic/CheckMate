@@ -9,16 +9,45 @@ import SwiftUI
 import ChessboardKit
 import ChessKit
 
+enum PuzzleMode {
+    case playing
+    case analysis
+    case puzzleComplete
+}
+
+struct AnalysisStep {
+    let moveLAN: String
+    let evaluation: MoveEvaluation?
+    let feedback: String
+    let isPlayerMove: Bool
+}
+
+
+
+
 struct ContentView: View {
     @State var chessboardModel: ChessboardModel
     @State var fenHistory: [String]
     
     // for puzzle
     @State var currentLevel: PuzzleLevel
-    @State var currentNoce: PuzzleNode
+    @State var currentNode: PuzzleNode
     @State var feedbacktext: String = "Find the best move for white"
     @State var moveEvaluation: MoveEvaluation? = nil
-    @State var currentCPUReplyLAN: [String] = []
+    
+    
+    // for tracker & analysis
+    @State var currentMode: PuzzleMode = .playing
+    @State var analysisSteps: [AnalysisStep] = []
+    @State var analysisIndex: Int = 0
+    
+    // for arrows
+    @State var currentArrows: [String] = []
+    @State var mistakeCount: Int = 0
+    @State var hasGivenUp: Bool = false
+    
+    @State var currentLevelId: Int = 1
+    
     
     
     init() {
@@ -36,7 +65,7 @@ struct ContentView: View {
         Board.rows = level.rows
         
         _currentLevel = State(initialValue: level)
-        _currentNoce = State(initialValue: level.rootNode)
+        _currentNode = State(initialValue: level.rootNode)
         
         _feedbacktext = State(initialValue: level.objective)
         
@@ -57,69 +86,123 @@ struct ContentView: View {
                 
             }
             Text(feedbacktext).padding()
+            HStack {
+                if currentMode == .playing && mistakeCount >= 5{
+                    Button (action: {
+                        hasGivenUp = true
+                        startAnalysis()
+                    }) {
+                        Text("Give up / Solution")
+                            .foregroundColor(.white)
+                            .padding(10)
+                            .background(Color.red)
+                            .cornerRadius(8)
+                    }
+                    
+                }
+                else if currentMode == .puzzleComplete {
+                    Button ("Start Analysis")
+                    {
+                        startAnalysis()
+                    }
+                    Spacer()
+                    
+                    if hasGivenUp {
+                        Button ("Retry Level")
+                        {
+                            retryLevel()
+                        }
+                        .foregroundStyle(.orange)
+                        
+                    } else {
+                        Button ("Next Level"){
+                            loadLevel(currentLevelId + 1)
+                        }
+                    }
+                }
+                else if currentMode == .analysis {
+                    HStack(spacing:20){
+                        Button("Restart"){
+                            startAnalysis()
+                        }
+                        if analysisIndex > 0 {
+                            Button("Previous Move"){
+                                previousAnalysisStep()
+                            }
+                        }
+                    }
+                    
+                    Spacer()
+                    if analysisIndex >= analysisSteps.count{
+                        if hasGivenUp {
+                            Button ("Retry Level"){
+                                retryLevel()
+                            }
+                            .foregroundStyle(.orange)
+                        } else {
+                            Button("Next Level")
+                            {
+                                loadLevel(currentLevelId + 1)
+                            }
+                        }
+                    } else {
+                        Button ("Next Move"){
+                            nextAnalysisStep()
+                        }
+                    }
+                }
+                
+            }
             
-            
-            //            Button("Undo Move"){
-            //                undo()
-            //            }
-            
-                .padding(.bottom)
+            .padding(.horizontal, 40)
+            .padding(.bottom)
             
             Chessboard(chessboardModel: chessboardModel)
                 .onMove { move, isLegal, from, to, lan, promotionPiece in
-                    print("Move: Fen: \(chessboardModel.fen) - Lan: \(lan)")
-                    
-                    if !isLegal {
-                        print("Illegal Move: \(lan)")
+                    if currentMode != .playing {
                         return
                     }
+                    if !isLegal {return}
                     
                     chessboardModel.game.make(move: move)
-                    chessboardModel.setFen(FenSerialization.default.serialize(position: chessboardModel.game.position), lan: lan)
-                    
                     let newFen = FenSerialization.default.serialize(position: chessboardModel.game.position)
-                    chessboardModel.setFen(newFen, lan: lan)
                     
-                    // append to the state
+                    chessboardModel.setFen(newFen, lan: lan)
                     fenHistory.append(newFen)
                     
                     evaluateMove(lan: lan)
-                }
-                .overlay{
                     
-                    
-                    if moveEvaluation == .blunder || moveEvaluation == .mistake{
-                        // arrow drawing eg
-                        
-                        
-                        ForEach(currentCPUReplyLAN, id: \.self) {
-                            arrowLAN in
-                            ArrowOverlay (lan: arrowLAN,
-                                          columns: chessboardModel.columns,
-                                          rows: chessboardModel.rows,
-                                          shouldFlip: chessboardModel.shouldFlipBoard,
-                            )
-                            .allowsHitTesting(false)
-                        }
-                        
-
-                        
-                        // automatic undo when tap the board
-                        Color.white.opacity(0.001)
-                            .onTapGesture {
-                                undo()
-                            }
-                    }
                 }
             
+            // drawing arrow
+                .overlay {
+                    if (currentMode == .playing && (moveEvaluation == .blunder || moveEvaluation == .mistake)) || currentMode == .analysis{
+                        ForEach(currentArrows, id: \.self) {
+                            arrowLAN in
+                            ArrowOverlay(lan: arrowLAN.trimmingCharacters(in: .whitespaces), columns: chessboardModel.columns, rows: chessboardModel.rows, shouldFlip: chessboardModel.shouldFlipBoard)
+                                .allowsHitTesting(false)
+                            
+                        }
+                        
+                        if currentMode == .playing
+                        {
+                            Color.white.opacity(0.001)
+                                .onTapGesture {
+                                    undo()
+                                }
+                        }
+                    }
+                    
+                }
                 .frame(width: 400, height: 400)
+                .id(currentLevelId)
+            
         }
     }
     
-    
     private func evaluateMove(lan: String){
-        currentCPUReplyLAN = []
-        if let outcome = currentNoce.expectedMoves[lan]{
+        currentArrows = []
+        if let outcome = currentNode.expectedMoves[lan]{
             moveEvaluation = outcome.evaluation
             feedbacktext = outcome.feedback
             
@@ -137,23 +220,37 @@ struct ContentView: View {
                         fenHistory.append(nextFEN)
                         
                         if let next = outcome.nextNode {
-                            currentNoce = next
+                            currentNode = next
+                            feedbacktext = "Find the next best move"
+                        }
+                        else {
+                            // Puzzle Finished!
+                            currentMode = .puzzleComplete
+                            feedbacktext = "Puzzle Completed!"
                         }
                         moveEvaluation = nil
-                        feedbacktext = "Find the next best move"
+                        
+                        
                     }
+                    
+                }
+                else {
+                    currentMode = .puzzleComplete
+                    feedbacktext = outcome.feedback + "\nPuzzle Completed!"
                 }
                 
             }
             else {
-                if let replyString = outcome.cpuReplyLAN {
-                    currentCPUReplyLAN = replyString.replacingOccurrences(of: " ", with: "").components(separatedBy: ",")
+                mistakeCount += 1
+                if let replyString = outcome.cpuReplyLAN{
+                    currentArrows = replyString.components(separatedBy: ",")
                 }
-                feedbacktext += "\nUndo and try again."
+                feedbacktext += "\nTap on the board to undo"
             }
             
         }
         else {
+            mistakeCount += 1
             moveEvaluation = .mistake
             feedbacktext = "That's not the best move. Try again"
             
@@ -177,10 +274,145 @@ struct ContentView: View {
             chessboardModel.setFen(previousFEN)
         }
         moveEvaluation =  nil
-        currentCPUReplyLAN = []
+        currentArrows = []
         feedbacktext = currentLevel.objective
         
     }
+    
+    private func loadLevel(_ id: Int){
+        let levelName = "Level\(id)"
+        do {
+            let nextLevel = try PuzzleLevel.load(fromBundle: levelName)
+            
+            // adjust board
+            Board.columns = nextLevel.columns
+            Board.rows = nextLevel.rows
+            
+            // update state
+            currentLevelId = id
+            currentLevel = nextLevel
+            feedbacktext = currentLevel.objective
+            currentNode = nextLevel.rootNode
+            
+            chessboardModel = ChessboardModel(fen: nextLevel.initialFEN, rows: nextLevel.rows, columns: nextLevel.columns)
+            fenHistory = [nextLevel.initialFEN]
+            
+            // reset everything :)
+            moveEvaluation = nil
+            currentArrows = []
+            mistakeCount = 0
+            hasGivenUp = false
+            currentMode = .playing
+            
+            
+            
+        } catch {
+            feedbacktext = "Congratulations! You've found a bug!"
+        }
+    }
+    
+    // retry level
+    private func retryLevel() {
+        chessboardModel.game = Game(position: FenSerialization.default.deserialize(fen: currentLevel.initialFEN))
+        chessboardModel.setFen(currentLevel.initialFEN)
+        
+        fenHistory = [currentLevel.initialFEN]
+        currentNode = currentLevel.rootNode
+        
+        moveEvaluation = nil
+        currentArrows = []
+        feedbacktext = currentLevel.objective
+        
+        mistakeCount = 0
+        hasGivenUp = false
+        currentMode = .playing
+        
+    }
+    
+    // post analysis
+    
+    private func extractGoldenPath(from node: PuzzleNode) -> [AnalysisStep] {
+        var steps: [AnalysisStep] = []
+        
+        if let correctMove = node.expectedMoves.first(where: {
+            $1.evaluation == .brilliant || $1.evaluation == .best
+        }) {
+            steps.append(AnalysisStep(moveLAN: correctMove.key, evaluation: correctMove.value.evaluation, feedback: correctMove.value.feedback, isPlayerMove: true))
+            
+            if let cpuLAN = correctMove.value.cpuReplyLAN {
+                let firstCPULAN = cpuLAN.components(separatedBy: ",").first ?? cpuLAN
+                steps.append(AnalysisStep(moveLAN: firstCPULAN, evaluation: nil, feedback: "The opponent's forced response.", isPlayerMove: false))
+                
+            }
+            if let nextNode = correctMove.value.nextNode {
+                steps.append(contentsOf: extractGoldenPath(from: nextNode))
+            }
+        }
+        
+        return steps
+    }
+    private func startAnalysis() {
+        currentMode = .analysis
+        analysisSteps = extractGoldenPath(from: currentLevel.rootNode)
+        analysisIndex = 0
+        
+        chessboardModel.setFen(currentLevel.initialFEN)
+        moveEvaluation = nil
+        feedbacktext = "Analysis Mode: Step through the solution."
+        currentArrows = []
+    }
+    
+    private func nextAnalysisStep() {
+        guard analysisIndex < analysisSteps.count else { return }
+        let step = analysisSteps[analysisIndex]
+        let move = Move(string: step.moveLAN)
+        chessboardModel.game.make(move: move)
+        let newFen = FenSerialization.default.serialize(position: chessboardModel.game.position)
+        chessboardModel.setFen(newFen, lan: step.moveLAN)
+        
+        
+        currentArrows = [step.moveLAN]
+        moveEvaluation = step.evaluation
+        feedbacktext = step.feedback
+        analysisIndex += 1
+        
+        if analysisIndex >= analysisSteps.count {
+            feedbacktext += "Analysis Complete"
+        }
+    }
+    
+    // undo button for analysis
+    private func previousAnalysisStep() {
+        guard analysisIndex > 0 else { return }
+        
+        analysisIndex -= 1
+        
+        // reset board
+        chessboardModel.game = Game(position: FenSerialization.default.deserialize(fen: currentLevel.initialFEN))
+        chessboardModel.setFen(currentLevel.initialFEN)
+        
+        if analysisIndex == 0{
+            moveEvaluation = nil
+            feedbacktext = "Analysis Mode: Tap 'Next move' "
+            currentArrows = []
+            
+        } else {
+            // reapply moves
+            for i in 0..<analysisIndex {
+                let step = analysisSteps[i]
+                chessboardModel.game.make(move: Move(string: step.moveLAN))
+                let newFen = FenSerialization.default.serialize(position: chessboardModel.game.position)
+                chessboardModel.setFen(newFen, lan: step.moveLAN)
+                
+            }
+            let currentStep = analysisSteps[analysisIndex - 1]
+            currentArrows = [currentStep.moveLAN]
+            moveEvaluation = currentStep.evaluation
+            feedbacktext = currentStep.feedback
+        }
+        
+    }
+    
 }
 
 
@@ -268,3 +500,4 @@ struct ArrowHead: Shape {
         return path
     }
 }
+
