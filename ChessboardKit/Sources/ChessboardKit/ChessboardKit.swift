@@ -44,12 +44,12 @@ public class ChessboardModel {
     
     
     public var rows: Int
-        public var columns: Int
-
-        public var fen: String {
-            get { FenSerialization.default.serialize(position: game.position) }
-            set { game = Game(position: FenSerialization.default.deserialize(fen: newValue)) }
-        }
+    public var columns: Int
+    
+    public var fen: String {
+        get { FenSerialization.default.serialize(position: game.position) }
+        set { game = Game(position: FenSerialization.default.deserialize(fen: newValue)) }
+    }
     public var size: CGFloat = 0
     
     public var colorScheme: ChessboardColorScheme = .light
@@ -84,21 +84,21 @@ public class ChessboardModel {
     public var movingPiece: (piece: Piece, from: BoardSquare, to: BoardSquare)?
     
     public init(fen: String = EMPTY_FEN,
-                    perspective: PieceColor = .white,
-                    colorScheme: ChessboardColorScheme = .light,
-                    allowOpponentMove: Bool = false,
-                    highlightLegalMoves: Bool = true,
-                    rows: Int = 8,       // default 8
-                    columns: Int = 8)    // default 8
-        {
-            self.rows = rows
-            self.columns = columns
-            self.game = Game(position: FenSerialization.default.deserialize(fen: fen))
-            self.perspective = perspective
-            self.colorScheme = colorScheme
-            self.allowOpponentMove = allowOpponentMove
-            self.highlightLegalMoves = highlightLegalMoves
-        }
+                perspective: PieceColor = .white,
+                colorScheme: ChessboardColorScheme = .light,
+                allowOpponentMove: Bool = false,
+                highlightLegalMoves: Bool = true,
+                rows: Int = 8,       // default 8
+                columns: Int = 8)    // default 8
+    {
+        self.rows = rows
+        self.columns = columns
+        self.game = Game(position: FenSerialization.default.deserialize(fen: fen))
+        self.perspective = perspective
+        self.colorScheme = colorScheme
+        self.allowOpponentMove = allowOpponentMove
+        self.highlightLegalMoves = highlightLegalMoves
+    }
     
     public var onMove: (Move, Bool, String, String, String, PieceKind? ) -> Void = { _, _, _, _, _, _ in }
     
@@ -131,13 +131,13 @@ public class ChessboardModel {
     }
     
     public func updateLegalMoveHighlights(for square: BoardSquare) {
-            guard highlightLegalMoves else {
-                legalMoveSquares.removeAll()
-                return
-            }
+        guard highlightLegalMoves else {
             legalMoveSquares.removeAll()
-            let index = square.row + square.column * self.rows
-            guard game.position.board[index] != nil else { return }
+            return
+        }
+        legalMoveSquares.removeAll()
+        let index = square.row + square.column * self.rows
+        guard game.position.board[index] != nil else { return }
         
         for move in game.legalMoves {
             if move.from.rank == square.row && move.from.file == square.column {
@@ -319,7 +319,7 @@ private struct MovingPieceView: View {
     var body: some View {
         Group {
             if let movingPiece = chessboardModel.movingPiece {
-            
+                
                 let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
                 let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
                 
@@ -361,8 +361,8 @@ public struct Chessboard: View {
         GeometryReader { geometry in
             ZStack {
                 backgroundView
-                labelsView
                 squaresView
+                labelsView
                 piecesView
                 legalMoveHighlightsView
                 
@@ -392,11 +392,11 @@ public struct Chessboard: View {
         }
         .aspectRatio(1, contentMode: .fit)
     }
-
+    
     private func chessboardSize(from geometrySize: CGSize) -> CGFloat {
         return min(geometrySize.width, geometrySize.height)
     }
-
+    
     private func updateChessboardSize(_ geometrySize: CGSize) {
         let newSize = chessboardSize(from: geometrySize)
         chessboardModel.size = newSize
@@ -410,204 +410,194 @@ public struct Chessboard: View {
     }
     
     var promotionPickerView: some View {
-            ZStack {
-
-                let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
-                let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
+        ZStack {
+            
+            let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
+            let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
+            
+            let buttonSize = min(sqWidth, sqHeight) * 0.85
+            let pickerSpacing = buttonSize * 0.15
+            let pickerPadding = buttonSize * 0.25
+            
+            Color.white.opacity(0.5)
+                .ignoresSafeArea()
+            
+            VStack(spacing: pickerPadding) {
+                Text("Promote Pawn")
+                    .font(.system(size: buttonSize * 0.3, weight: .bold, design: .rounded))
+                    .foregroundStyle(.secondary)
                 
-                let buttonSize = min(sqWidth, sqHeight) * 0.85
-                let pickerSpacing = buttonSize * 0.15
-                let pickerPadding = buttonSize * 0.25
-                
-                Color.white.opacity(0.5)
-                    .ignoresSafeArea()
-                
-                VStack(spacing: pickerPadding) {
-                                Text("Promote Pawn")
-                                    .font(.system(size: buttonSize * 0.3, weight: .bold, design: .rounded))
-                                    .foregroundStyle(.secondary)
+                HStack(spacing: pickerSpacing) {
+                    ForEach(["q", "r", "b", "n"], id: \.self) { (piece: String) in
+                        Button {
+                            handlePromotion(to: piece)
+                        } label: {
+                            ZStack {
+                                let imageName = "\(chessboardModel.perspective == PieceColor.white ? "w" : "b")\(piece.uppercased())"
                                 
-                                HStack(spacing: pickerSpacing) {
-                                    ForEach(["q", "r", "b", "n"], id: \.self) { (piece: String) in
-                                        Button {
-                                            handlePromotion(to: piece)
-                                        } label: {
-                                            ZStack {
-                                                let imageName = "\(chessboardModel.perspective == PieceColor.white ? "w" : "b")\(piece.uppercased())"
-                                                
-                                                // Piece Icon
-                                                AsyncImage(url: Bundle.module.url(forResource: imageName, withExtension: "png")) { phase in
-                                                    if let image = phase.image {
-                                                        image
-                                                            .resizable()
-                                                            .scaledToFit()
-                                                            .frame(width: buttonSize * 0.8, height: buttonSize * 0.8)
-                                                    } else {
-                                                        ProgressView()
-                                                    }
-                                                }
-                                            }
-                                            .frame(width: buttonSize, height: buttonSize)
-                                            .background(Color(uiColor: .systemBackground))
-                                            .cornerRadius(buttonSize * 0.2)
-                                            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-                                        }
-                                        .buttonStyle(PlainButtonStyle())
+                                // Piece Icon
+                                AsyncImage(url: Bundle.module.url(forResource: imageName, withExtension: "png")) { phase in
+                                    if let image = phase.image {
+                                        image
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: buttonSize * 0.8, height: buttonSize * 0.8)
+                                    } else {
+                                        ProgressView()
                                     }
                                 }
                             }
-                            .padding(pickerPadding)
-                            .background(.ultraThinMaterial)
-                            .cornerRadius(buttonSize * 0.4)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: buttonSize * 0.4)
-                                    .stroke(.white.opacity(0.5), lineWidth: 1)
-                            )
-                            .shadow(radius: 20)
+                            .frame(width: buttonSize, height: buttonSize)
+                            .background(Color(uiColor: .systemBackground))
+                            .cornerRadius(buttonSize * 0.2)
+                            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
                         }
+                        .buttonStyle(PlainButtonStyle())
                     }
- 
-                    private func handlePromotion(to piece: String) {
-                        guard let sourceSquare = chessboardModel.promotionSourceSquare,
-                              let targetSquare = chessboardModel.promotionTargetSquare,
-                              let lan = chessboardModel.promotionLan
-                        else {
-                            chessboardModel.absentePromotionPicker()
-                            return
-                        }
-                        
-                        let promotedLan = lan + piece.uppercased()
-                        let promotedMove = Move(string: promotedLan)
-                        let isLegal = chessboardModel.game.legalMoves.contains(promotedMove)
-                        
-                        chessboardModel.onMove(promotedMove, isLegal, sourceSquare, targetSquare, promotedLan, PieceKind(rawValue: piece))
-                        chessboardModel.absentePromotionPicker()
-                    }
-    
-    var backgroundView: some View {
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: chessboardModel.columns), spacing: 0) {
-                ForEach(0..<(chessboardModel.rows * chessboardModel.columns), id: \.self) { index in
-                    let row = index / chessboardModel.columns
-                    let column = index % chessboardModel.columns
-                    let isLightSquare = (row + column) % 2 == 0
-                    
-                    Rectangle()
-                    // background colour for board
-                        .fill(isLightSquare ? chessboardModel.colorScheme.light : chessboardModel.colorScheme.dark)
-                        .frame(width: chessboardModel.size / CGFloat(chessboardModel.columns),
-                               height: chessboardModel.size / CGFloat(chessboardModel.rows))
                 }
             }
+            .padding(pickerPadding)
+            .background(.ultraThinMaterial)
+            .cornerRadius(buttonSize * 0.4)
+            .overlay(
+                RoundedRectangle(cornerRadius: buttonSize * 0.4)
+                    .stroke(.white.opacity(0.5), lineWidth: 1)
+            )
+            .shadow(radius: 20)
         }
+    }
     
-    var labelsView: some View {
-            ZStack {
-                ForEach(0..<chessboardModel.rows, id: \.self) { row in
-                    rowLabelView(row: row)
-                }
-                ForEach(0..<chessboardModel.columns, id: \.self) { column in
-                    columnLabelView(column: column)
-                }
-            }
-        }
-
-        func rowLabelView(row: Int) -> some View {
-            let displayRow = chessboardModel.shouldFlipBoard ? (chessboardModel.rows - 1 - row) : row
-            let labelSize = chessboardModel.size / 32
-            let squareHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
-            
-            return Text("\(displayRow + 1)")
-                .font(.system(size: labelSize))
-                .foregroundColor(chessboardModel.colorScheme.label)
-                .frame(width: labelSize, height: squareHeight, alignment: .center)
-                .position(
-                    x: labelSize / 2 + 2,
-                    y: chessboardModel.size - (CGFloat(row) * squareHeight + squareHeight - 10)
-                )
+    private func handlePromotion(to piece: String) {
+        guard let sourceSquare = chessboardModel.promotionSourceSquare,
+              let targetSquare = chessboardModel.promotionTargetSquare,
+              let lan = chessboardModel.promotionLan
+        else {
+            chessboardModel.absentePromotionPicker()
+            return
         }
         
-        func columnLabelView(column: Int) -> some View {
-            let displayColumn = chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1 - column) : column
-            let labelSize = chessboardModel.size / 32
-            let squareWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
-            let letters = Array("abcdefghijklmnopqrstuvwxyz")
-            
-            return Text(String(letters[displayColumn]))
-                .font(.system(size: labelSize))
-                .foregroundColor(chessboardModel.colorScheme.label)
-                .frame(width: squareWidth, height: labelSize, alignment: .center)
-                .position(
-                    x: (CGFloat(column) * squareWidth + squareWidth) - 8,
-                    y: (chessboardModel.size - labelSize / 2) - 4
-                )
+        let promotedLan = lan + piece.uppercased()
+        let promotedMove = Move(string: promotedLan)
+        let isLegal = chessboardModel.game.legalMoves.contains(promotedMove)
+        
+        chessboardModel.onMove(promotedMove, isLegal, sourceSquare, targetSquare, promotedLan, PieceKind(rawValue: piece))
+        chessboardModel.absentePromotionPicker()
+    }
+    
+    var backgroundView: some View {
+        Color.clear
+    }
+    
+    var labelsView: some View {
+        ZStack {
+            ForEach(0..<chessboardModel.rows, id: \.self) { row in
+                rowLabelView(row: row)
+            }
+            ForEach(0..<chessboardModel.columns, id: \.self) { column in
+                columnLabelView(column: column)
+            }
         }
+    }
+    
+    func rowLabelView(row: Int) -> some View {
+        let displayRow = chessboardModel.shouldFlipBoard ? (chessboardModel.rows - 1 - row) : row
+        let labelSize = chessboardModel.size / 32
+        let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
+        let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
+        let padding = min(sqWidth, sqHeight) * 0.05
+        
+        return Text("\(displayRow + 1)")
+            .font(.system(size: labelSize, weight: .bold))
+            .foregroundColor(chessboardModel.colorScheme.label)
+            .position(
+                x: padding + (labelSize / 2) + 4,
+                y: chessboardModel.size - (CGFloat(row) * sqHeight) - sqHeight + padding + (labelSize / 2) + 4
+            )
+    }
+    
+    func columnLabelView(column: Int) -> some View {
+        let displayColumn = chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1 - column) : column
+        let labelSize = chessboardModel.size / 32
+        let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
+        let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
+        let padding = min(sqWidth, sqHeight) * 0.05
+        let letters = Array("abcdefghijklmnopqrstuvwxyz")
+        
+        return Text(String(letters[displayColumn]))
+            .font(.system(size: labelSize, weight: .bold))
+            .foregroundColor(chessboardModel.colorScheme.label)
+            .position(
+                x: (CGFloat(column) * sqWidth) + sqWidth - padding - (labelSize / 2) - 4,
+                y: chessboardModel.size - padding - (labelSize / 2) - 4
+            )
+    }
     
     var squaresView: some View {
-            ZStack {
-                let totalSquares = chessboardModel.rows * chessboardModel.columns
-                let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
-                let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
+        ZStack {
+            let totalSquares = chessboardModel.rows * chessboardModel.columns
+            let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
+            let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
+            
+            ForEach(0..<totalSquares, id: \.self) { index in
+                let row = index % chessboardModel.rows
+                let column = index / chessboardModel.rows
+                let piece = chessboardModel.game.position.board[index]
                 
-                ForEach(0..<totalSquares, id: \.self) { index in
-                    let row = index % chessboardModel.rows
-                    let column = index / chessboardModel.rows
-                    let piece = chessboardModel.game.position.board[index]
-                    
-                    ChessSquareView(piece: piece, row: row, column: column)
+                ChessSquareView(piece: piece, row: row, column: column)
                     .position(
                         x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - column : column),
-                       
+                        
                         y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? row : (chessboardModel.rows - 1) - row)
                     )
-                }
             }
         }
+    }
     
     var piecesView: some View {
-            ZStack {
-                let totalSquares = chessboardModel.rows * chessboardModel.columns
-                let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
-                let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
+        ZStack {
+            let totalSquares = chessboardModel.rows * chessboardModel.columns
+            let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
+            let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
+            
+            ForEach(0..<totalSquares, id: \.self) { index in
+                let row = index % chessboardModel.rows
+                let column = index / chessboardModel.rows
+                let piece = chessboardModel.game.position.board[index]
                 
-                ForEach(0..<totalSquares, id: \.self) { index in
-                    let row = index % chessboardModel.rows
-                    let column = index / chessboardModel.rows
-                    let piece = chessboardModel.game.position.board[index]
-                    
-                    let isMoving = chessboardModel.movingPiece?.from == BoardSquare(row: row, column: column) ||
-                                   chessboardModel.movingPiece?.to == BoardSquare(row: row, column: column)
-                    
-                    ChessPieceView(animation: animation,
-                                   piece: piece,
-                                   square: BoardSquare(row: row, column: column))
-                    .opacity(isMoving ? 0.0 : 1.0)
-                    .animation(nil, value: isMoving)
-                    .position(
-                        x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - column : column),
-                        y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? row : (chessboardModel.rows - 1) - row)
-                    )
-                }
+                let isMoving = chessboardModel.movingPiece?.from == BoardSquare(row: row, column: column) ||
+                chessboardModel.movingPiece?.to == BoardSquare(row: row, column: column)
+                
+                ChessPieceView(animation: animation,
+                               piece: piece,
+                               square: BoardSquare(row: row, column: column))
+                .opacity(isMoving ? 0.0 : 1.0)
+                .animation(nil, value: isMoving)
+                .position(
+                    x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - column : column),
+                    y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? row : (chessboardModel.rows - 1) - row)
+                )
             }
         }
+    }
     
     var legalMoveHighlightsView: some View {
-            ZStack {
-                let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
-                let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
-                let highlightSize = min(sqWidth, sqHeight) / 3
-                
-                ForEach(Array(chessboardModel.legalMoveSquares), id: \.id) { square in
-                    Circle()
-                        .fill(chessboardModel.colorScheme.legalMove)
-                        .frame(width: highlightSize, height: highlightSize)
-                        .position(
-                            x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - square.column : square.column),
-                            y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? square.row : (chessboardModel.rows - 1) - square.row)
-                        )
-                }
+        ZStack {
+            let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
+            let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
+            let highlightSize = min(sqWidth, sqHeight) / 3
+            
+            ForEach(Array(chessboardModel.legalMoveSquares), id: \.id) { square in
+                Circle()
+                    .fill(chessboardModel.colorScheme.legalMove)
+                    .frame(width: highlightSize, height: highlightSize)
+                    .position(
+                        x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - square.column : square.column),
+                        y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? square.row : (chessboardModel.rows - 1) - square.row)
+                    )
             }
-            .allowsHitTesting(false)
         }
+        .allowsHitTesting(false)
+    }
     public func onMove(_ callback: @escaping (Move, Bool, String, String, String, PieceKind?) -> Void) -> Chessboard {
         chessboardModel.onMove = callback
         return self
@@ -648,36 +638,63 @@ private struct ChessSquareView: View {
         (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? row : (chessboardModel.rows - 1) - row)
     }
     
+    var isLightSquare: Bool {
+        return (row + column) % 2 != 0
+    }
+    
     var body: some View {
         ZStack {
+            let imageName = isLightSquare ? "whiteBoard" : "blackBoard"
+            AsyncImage(url: Bundle.module.url(forResource: imageName, withExtension: "png")){ phase in
+                if let image = phase.image {
+                    image
+                        .resizable()
+                        .scaledToFill()
+                    
+                } else {
+                    if isLightSquare {
+                        chessboardModel.colorScheme.light
+                    }
+                    else{
+                        chessboardModel.colorScheme.dark
+                    }
+                }
+                
+            }
+            .padding(min(sqWidth, sqHeight) * 0.05) // 5% multiplier padding
             Color.clear.contentShape(Rectangle())
         }
-        .font(.system(size: min(sqWidth, sqHeight) * 0.75))
+        
+        .font(.system(size: min (sqWidth, sqHeight) * 0.75))
         .frame(width: sqWidth, height: sqHeight)
         .modifier {
-            if let dropTarget = chessboardModel.dropTarget,
-               !isDragging &&
-                dropTarget.row == row && dropTarget.column == column
-            {
-                $0.overlay {
+            if let dropTarget = chessboardModel.dropTarget, !isDragging && dropTarget.row == row && dropTarget.column == column {
+                $0.overlay{
                     RoundedRectangle(cornerRadius: 2)
                         .stroke(chessboardModel.colorScheme.selected, lineWidth: 3.5)
                 }
-            } else if isSelected {
-                $0.overlay {
+                
+            }
+            else if isSelected {
+                $0.overlay{
                     RoundedRectangle(cornerRadius: 2)
                         .stroke(chessboardModel.colorScheme.selected, lineWidth: 3.5)
                 }
-            } else if isHinted {
-                $0.overlay {
+            }
+            else if isHinted {
+                $0.overlay{
                     RoundedRectangle(cornerRadius: 2)
-                        .stroke(chessboardModel.colorScheme.hinted, lineWidth: 3.5)
+                        .stroke(chessboardModel.colorScheme.selected, lineWidth: 3.5)
                 }
-            } else { $0 }
+            }
+            else {
+                $0
+            }
         }
+        .padding(min(sqWidth, sqHeight) * 0.05) //adjust padding
+        .frame(width: sqWidth, height: sqHeight)
     }
 }
-
 private struct ChessPieceView: View {
     @Environment(ChessboardModel.self) var chessboardModel
     
@@ -747,6 +764,7 @@ private struct ChessPieceView: View {
             }
         }
         .zIndex(zIndex)
+        .padding(min(sqWidth, sqHeight) * 0.05) // adjust padding
         .font(.system(size: min(sqWidth, sqHeight) * 0.75))
         .frame(width: sqWidth, height: sqHeight)
         .offset(offset)
