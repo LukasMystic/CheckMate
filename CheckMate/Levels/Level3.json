@@ -1,0 +1,49 @@
+{
+  "id": 3,
+  "objective": "Find the Mate in 2 for White.",
+  "columns": 4,
+  "rows": 4,
+  "initialFEN": "1r1k/2pp/Q3/2NK w - - 0 1",
+  "rootNode": {
+    "expectedMoves": {
+      
+      "c1b3": {
+        "evaluation": "Best Move",
+        "feedback": "Great check! You force the king to step forward.",
+        "cpuReplyLAN": "d4c4",
+        "nextNode": {
+          "expectedMoves": {
+            "a2c4": {
+              "evaluation": "Brilliant",
+              "feedback": "Checkmate! A beautiful Queen sacrifice point-blank."
+            },
+            "a2a4": {
+              "evaluation": "Mistake",
+              "feedback": "You missed the mate! The king escapes.",
+              "cpuReplyLAN": "b4a4"
+            }
+          }
+        }
+      },
+      
+      "c1d3": {
+        "evaluation": "Blunder",
+        "feedback": "Sacrificing the Knight on the pawn is completely unsupported.",
+        "cpuReplyLAN": "d4d3"
+      },
+      
+      "a2c4": {
+        "evaluation": "Mistake",
+        "feedback": "Checking diagonally is a blunder! Black's Rook is watching.",
+        "cpuReplyLAN": "b4c4"
+      },
+      
+      "a2a4": {
+        "evaluation": "Blunder",
+        "feedback": "You gave up the Queen for free!",
+        "cpuReplyLAN": "d4a4"
+      }
+      
+    }
+  }
+}

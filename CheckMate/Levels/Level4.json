@@ -1,0 +1,39 @@
+{
+  "id": 4,
+  "objective": "Black to move. Find the Mate in 2.",
+  "columns": 4,
+  "rows": 4,
+  "initialFEN": "Qbqk/N1pp/PP/KB1R b - - 0 1",
+  "rootNode": {
+    "expectedMoves": {
+      "c3b2": {
+        "evaluation": "Best Move",
+        "feedback": "Great pawn push! This forces the White King out of hiding.",
+        "cpuReplyLAN": "a1b2",
+        "nextNode": {
+          "expectedMoves": {
+            "c4c3": {
+              "evaluation": "Brilliant",
+              "feedback": "Checkmate! The Queen delivers the final blow."
+            },
+            "c4a2": {
+              "evaluation": "Blunder",
+              "feedback": "You sacrificed the Queen for nothing!",
+              "cpuReplyLAN": "b1a2"
+            }
+          }
+        }
+      },
+      "c4a2": {
+        "evaluation": "Mistake",
+        "feedback": "Sacrificing the Queen early doesn't work here. The Bishop guards a2.",
+        "cpuReplyLAN": "b1a2"
+      },
+      "c4a4": {
+        "evaluation": "Mistake",
+        "feedback": "Trading Queens relieves all the pressure on White.",
+        "cpuReplyLAN": "a1a4"
+      }
+    }
+  }
+}
