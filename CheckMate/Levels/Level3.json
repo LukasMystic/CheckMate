@@ -1,0 +1,107 @@
+{
+  "id": 3,
+  "objective": "Find the Mate in 4 for White.",
+  "columns": 4,
+  "rows": 4,
+  "initialFEN": "1r1k/2pp/Q3/2NK w - - 0 1",
+  "rootNode": {
+    "expectedMoves": {
+      "c1b3": {
+        "evaluation": "Best Move",
+        "feedback": "Great check! You force the king to step forward.",
+        "cpuReplyLAN": "d4c4",
+        "nextNode": {
+          "expectedMoves": {
+            "b3d2": {
+              "evaluation": "Brilliant!",
+              "feedback": "Checkmate! A beautiful Queen sacrifice point-blank.",
+              "cpuReplyLAN": "c4d4",
+              "nextNode": {
+                "expectedMoves": {
+                  "a2c4": {
+                    "evaluation": "Brilliant!",
+                    "feedback": "A beautiful mate incoming",
+                    "cpuReplyLAN": "b4c4",
+                    "nextNode": {
+                      "expectedMoves": {
+                        "d2b3": {
+                          "evaluation": "Best Move",
+                          "feedback": "You just smothered the enemy king"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "b3a1": {
+              "evaluation": "Mistake",
+              "feedback": "You missed the mate! The king escapes.",
+              "cpuReplyLAN": "b4a4"
+            },
+            "b3c1": {
+              "evaluation": "Mistake",
+              "feedback": "You missed the mate! The king escapes.",
+              "cpuReplyLAN": "b4a4"
+            },
+            "b3d4": {
+              "evaluation": "Mistake",
+              "feedback": "You missed the mate! The king escapes.",
+              "cpuReplyLAN": "b4a4"
+            }
+          }
+        }
+      },
+      "c1d3": {
+        "evaluation": "Mistake",
+        "feedback": "Sacrificing the Knight on the pawn is completely unsupported.",
+        "cpuReplyLAN": "d4d3"
+      },
+      "a2c4": {
+        "evaluation": "Blunder",
+        "feedback": "You gave up the Queen for free!",
+        "cpuReplyLAN": "d4c4"
+      },
+      "a2a4": {
+        "evaluation": "Blunder",
+        "feedback": "You gave up the Queen for free!",
+        "cpuReplyLAN": "b4a4"
+      },
+      "a2a3": {
+        "evaluation": "Mistake",
+        "feedback": "You missed the mate",
+        "cpuReplyLAN": "d4c4"
+      },
+      "a2b3": {
+        "evaluation": "Blunder",
+        "feedback": "You gave up the Queen for free!",
+        "cpuReplyLAN": "b4b3"
+      },
+      "a2b2": {
+        "evaluation": "Blunder",
+        "feedback": "You gave up the Queen for free!",
+        "cpuReplyLAN": "c3b2"
+      },
+      "a2c2": {
+        "evaluation": "Blunder",
+        "feedback": "You gave up the Queen for free!",
+        "cpuReplyLAN": "d3c2"
+      },
+      "a2d2": {
+        "evaluation": "Blunder",
+        "feedback": "You gave up the Queen for free!",
+        "cpuReplyLAN": "c3d2"
+      },
+      "a2b1": {
+        "evaluation": "Blunder",
+        "feedback": "You gave up the Queen for free!",
+        "cpuReplyLAN": "b4b1"
+      },
+      "a2a1": {
+        "evaluation": "Mistake",
+        "feedback": "You missed the mate",
+        "cpuReplyLAN": "d3d2"
+      }
+    }
+  }
+}
