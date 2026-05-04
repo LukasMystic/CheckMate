@@ -29,6 +29,8 @@ struct ContentView: View {
     @State var chessboardModel: ChessboardModel
     @State var fenHistory: [String]
     
+    @AppStorage("highestUnlockedLevel") var highestUnlockedLevel: Int = 1
+    
     // for puzzle
     @State var currentLevel: PuzzleLevel
     @State var currentNode: PuzzleNode
@@ -50,7 +52,7 @@ struct ContentView: View {
     
     
     
-    init() {
+    init(levelId: Int = 1) {
         
         let level: PuzzleLevel
         do{
@@ -63,6 +65,8 @@ struct ContentView: View {
         
         Board.columns = level.columns
         Board.rows = level.rows
+        
+        _currentLevelId = State(initialValue: levelId)
         
         _currentLevel = State(initialValue: level)
         _currentNode = State(initialValue: level.rootNode)
@@ -236,6 +240,9 @@ struct ContentView: View {
                             // Puzzle Finished!
                             currentMode = .puzzleComplete
                             feedbacktext = "Puzzle Completed!"
+                            if currentLevelId >= highestUnlockedLevel {
+                                highestUnlockedLevel = currentLevelId + 1
+                            }
                         }
                         moveEvaluation = nil
                         
@@ -246,6 +253,9 @@ struct ContentView: View {
                 else {
                     currentMode = .puzzleComplete
                     feedbacktext = outcome.feedback + "\nPuzzle Completed!"
+                    if currentLevelId >= highestUnlockedLevel {
+                        highestUnlockedLevel = currentLevelId + 1
+                    }
                 }
                 
             }
