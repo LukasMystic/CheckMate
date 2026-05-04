@@ -6,7 +6,7 @@
 //
 
 class LevelClass {
-    var status = true
+    var status = false
 }
 
 var Level1 = LevelClass()

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct GameView: View {
-    
+    @State private var scale = 0.5
     let backgroundGradient = Color("BackgroundColor")
     
     var body: some View {
@@ -78,6 +78,11 @@ struct GameView: View {
                 //undo and solution
                 VStack {
                     SolutionButton()
+                        .animation(.easeIn(duration: 0.3).repeatCount(1, autoreverses: true), value: scale)
+                                    .onAppear {
+                                        scale = 1
+                                    }
+
                 }
                 .padding(.bottom, 20)
                 
@@ -103,6 +108,11 @@ struct GameView: View {
                     Color.background.opacity(0.72)
                         .ignoresSafeArea()
                     WinPopUpView()
+                        .scaleEffect(scale)
+                        .animation(.easeIn(duration: 0.3).repeatCount(1, autoreverses: true), value: scale)
+                                    .onAppear {
+                                        scale = 1
+                                    }
                 }
             }
         }
