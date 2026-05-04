@@ -62,6 +62,7 @@ struct LevelRow: View {
                             .fontWeight(.bold)
                             .foregroundColor(.black)
                             .offset(y: -2)
+                            .foregroundColor(Color("ArrowColor"))
                     }
                 }
             
@@ -117,9 +118,12 @@ struct LevelView: View {
                         .offset(y: -55)
                 }
                 .padding(.top, 100)
-                .padding(.leading, 150)
+                .padding(.leading, 230)
+                .shadow(radius: 3)
                 
                 Spacer()
+                
+                
                 
                 Button(action: {
                     // action
