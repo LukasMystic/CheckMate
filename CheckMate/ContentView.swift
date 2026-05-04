@@ -79,13 +79,15 @@ struct ContentView: View {
     var body: some View {
         VStack{
             
-            if let eval = moveEvaluation{
-                Text(eval.rawValue)
-                    .font(.title2).bold()
-                    .foregroundColor(eval == .brilliant || eval == .best ? .green : .red)
-                
-            }
-            Text(feedbacktext).padding()
+            Text(moveEvaluation?.rawValue ?? " ")
+                .font(.title2).bold()
+                .foregroundColor((moveEvaluation == .brilliant || moveEvaluation == .best) ? .green : .red)
+                .opacity(moveEvaluation == nil ? 0 : 1)
+                .padding(.top)
+            Text(feedbacktext)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+                .frame(height: 60)
             HStack {
                 if currentMode == .playing && mistakeCount >= 5{
                     Button (action: {
@@ -153,11 +155,14 @@ struct ContentView: View {
                 }
                 
             }
-            
+            .frame(height: 50)
             .padding(.horizontal, 40)
             .padding(.bottom)
             
+            
+            
             Chessboard(chessboardModel: chessboardModel)
+            
                 .onMove { move, isLegal, from, to, lan, promotionPiece in
                     if currentMode != .playing {
                         return
@@ -173,6 +178,7 @@ struct ContentView: View {
                     evaluateMove(lan: lan)
                     
                 }
+                .disabled(currentMode != .playing)
             
             // drawing arrow
                 .overlay {
@@ -194,6 +200,7 @@ struct ContentView: View {
                     }
                     
                 }
+            
                 .frame(width: 400, height: 400)
                 .id(currentLevelId)
             
@@ -202,11 +209,13 @@ struct ContentView: View {
     
     private func evaluateMove(lan: String){
         currentArrows = []
+        let targetSquare = String(lan.suffix(2)) // extract destination square
         if let outcome = currentNode.expectedMoves[lan]{
             moveEvaluation = outcome.evaluation
             feedbacktext = outcome.feedback
             
             if outcome.evaluation == .brilliant || outcome.evaluation == .best {
+                chessboardModel.clearEvaluation()
                 if let cpuLANString = outcome.cpuReplyLAN {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.6)
                     {
@@ -242,6 +251,12 @@ struct ContentView: View {
             }
             else {
                 mistakeCount += 1
+                if outcome.evaluation == .blunder {
+                    chessboardModel.setEvaluation(.blunder, for: targetSquare)
+                } else {
+                    chessboardModel.setEvaluation(.mistake, for: targetSquare)
+                }
+                
                 if let replyString = outcome.cpuReplyLAN{
                     currentArrows = replyString.components(separatedBy: ",")
                 }
@@ -252,6 +267,7 @@ struct ContentView: View {
         else {
             mistakeCount += 1
             moveEvaluation = .mistake
+            chessboardModel.setEvaluation(.mistake, for: targetSquare)
             feedbacktext = "That's not the best move. Try again"
             
         }
@@ -276,6 +292,7 @@ struct ContentView: View {
         moveEvaluation =  nil
         currentArrows = []
         feedbacktext = currentLevel.objective
+        chessboardModel.clearEvaluation()
         
     }
     
@@ -424,7 +441,6 @@ struct ContentView: View {
 // arrow design (sadly hardcoded first)
 
 // MARK: - Arrow Drawing Views
-
 struct ArrowOverlay: View {
     let lan: String
     let columns: Int
@@ -440,14 +456,19 @@ struct ArrowOverlay: View {
             
             let startPoint = point(for: startSquare, sqWidth: sqWidth, sqHeight: sqHeight)
             let endPoint = point(for: endSquare, sqWidth: sqWidth, sqHeight: sqHeight)
-            Path { path in
-                path.move(to: startPoint)
-                path.addLine(to: endPoint)
-            }
-            .stroke(Color.red.opacity(0.7), lineWidth: sqWidth * 0.15)
             
-            ArrowHead(start: startPoint, end: endPoint, width: sqWidth * 0.35)
-                .fill(Color.red.opacity(0.7))
+            let distance = hypot(endPoint.x - startPoint.x, endPoint.y - startPoint.y)
+            let midX = (startPoint.x + endPoint.x) / 2
+            let midY = (startPoint.y + endPoint.y) / 2
+            
+            let angle = atan2(endPoint.y - startPoint.y, endPoint.x - startPoint.x)
+            
+            Image("ArrowAnalysis")
+                .resizable()
+                .frame(width: sqWidth * 0.4, height: distance)
+                .rotationEffect(.radians(Double(angle) + .pi / 2))
+                .position(x: midX, y: midY)
+                .opacity(0.8)
         }
     }
     
@@ -458,9 +479,7 @@ struct ArrowOverlay: View {
         let fileChar = square.first!
         let rankChar = square.last!
         
-        // Convert 'a' -> 0, 'b' -> 1
         let file = Int(fileChar.asciiValue! - Character("a").asciiValue!)
-        // Convert '1' -> 0, '2' -> 1
         let rank = Int(String(rankChar))! - 1
         
         let col = shouldFlip ? (columns - 1) - file : file
@@ -470,34 +489,3 @@ struct ArrowOverlay: View {
                        y: (CGFloat(row) + 0.5) * sqHeight)
     }
 }
-
-struct ArrowHead: Shape {
-    let start: CGPoint
-    let end: CGPoint
-    let width: CGFloat
-    
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        let angle = atan2(end.y - start.y, end.x - start.x)
-        let length = width
-        
-        let tip = end
-        
-        let left = CGPoint(
-            x: end.x - length * cos(angle - .pi / 6),
-            y: end.y - length * sin(angle - .pi / 6)
-        )
-        
-        let right = CGPoint(
-            x: end.x - length * cos(angle + .pi / 6),
-            y: end.y - length * sin(angle + .pi / 6)
-        )
-        
-        path.move(to: tip)
-        path.addLine(to: left)
-        path.addLine(to: right)
-        path.closeSubpath()
-        return path
-    }
-}
-

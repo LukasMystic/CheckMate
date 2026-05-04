@@ -21,6 +21,11 @@ public struct BoardSquare: Identifiable, Hashable {
     public var row: Int
     public var column: Int
     
+    public enum MoveEvaluation {
+        case mistake
+        case blunder
+    }
+    
     public var id: String {
         "\(row),\(column)"
     }
@@ -99,6 +104,27 @@ public class ChessboardModel {
         self.allowOpponentMove = allowOpponentMove
         self.highlightLegalMoves = highlightLegalMoves
     }
+    
+    // evaluation for blunder and or mistake highlight
+    public var evaluatedSquare: BoardSquare? = nil
+        public var moveEvaluation: MoveEvaluation? = nil
+        
+        public func setEvaluation(_ evaluation: MoveEvaluation, for square: String) {
+            guard square.count == 2,
+                  let fileChar = square.first,
+                  let rankChar = square.last,
+                  let file = "abcdefgh".firstIndex(of: fileChar)?.utf16Offset(in: "abcdefgh"),
+                  let rank = Int(String(rankChar)) else { return }
+            
+            self.moveEvaluation = evaluation
+            self.evaluatedSquare = BoardSquare(row: rank - 1, column: file)
+        }
+        
+        public func clearEvaluation() {
+            self.moveEvaluation = nil
+            self.evaluatedSquare = nil
+        }
+    
     
     public var onMove: (Move, Bool, String, String, String, PieceKind? ) -> Void = { _, _, _, _, _, _ in }
     
@@ -362,8 +388,10 @@ public struct Chessboard: View {
             ZStack {
                 backgroundView
                 squaresView
+                evaluationBackgroundsView
                 labelsView
                 piecesView
+                evaluationIconsView
                 legalMoveHighlightsView
                 
                 MovingPieceView(animation: animation)
@@ -433,7 +461,8 @@ public struct Chessboard: View {
                             handlePromotion(to: piece)
                         } label: {
                             ZStack {
-                                let imageName = "\(chessboardModel.perspective == PieceColor.white ? "w" : "b")\(piece.uppercased())"
+                                let isWhite = chessboardModel.promotionPiece?.color == .white
+                                let imageName = "\(isWhite ? "w" : "b")\(piece.uppercased())"
                                 
                                 // Piece Icon
                                 AsyncImage(url: Bundle.module.url(forResource: imageName, withExtension: "png")) { phase in
@@ -587,13 +616,29 @@ public struct Chessboard: View {
             let highlightSize = min(sqWidth, sqHeight) / 3
             
             ForEach(Array(chessboardModel.legalMoveSquares), id: \.id) { square in
-                Circle()
-                    .fill(chessboardModel.colorScheme.legalMove)
-                    .frame(width: highlightSize, height: highlightSize)
-                    .position(
-                        x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - square.column : square.column),
-                        y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? square.row : (chessboardModel.rows - 1) - square.row)
-                    )
+                // Note: In ChessboardKit, index is (row + column * rows)
+                let pieceTargetIndex = square.row + square.column * chessboardModel.rows
+                let isCapture = chessboardModel.game.position.board[pieceTargetIndex] != nil
+                
+                if isCapture {
+                    // red dot
+                    Circle()
+                        .fill(Color.red.opacity(0.8))
+                        .frame(width: highlightSize, height: highlightSize)
+                        .position(
+                            x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - square.column : square.column),
+                            y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? square.row : (chessboardModel.rows - 1) - square.row)
+                        )
+                } else {
+                    // normal move dot
+                    Circle()
+                        .fill(chessboardModel.colorScheme.legalMove)
+                        .frame(width: highlightSize, height: highlightSize)
+                        .position(
+                            x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - square.column : square.column),
+                            y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? square.row : (chessboardModel.rows - 1) - square.row)
+                        )
+                }
             }
         }
         .allowsHitTesting(false)
@@ -601,6 +646,58 @@ public struct Chessboard: View {
     public func onMove(_ callback: @escaping (Move, Bool, String, String, String, PieceKind?) -> Void) -> Chessboard {
         chessboardModel.onMove = callback
         return self
+    }
+    
+    var evaluationBackgroundsView: some View {
+        ZStack {
+            if let evalSquare = chessboardModel.evaluatedSquare {
+                let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
+                let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
+                
+                RoundedRectangle(cornerRadius: 11)
+                    .fill(Color(red: 255/255, green: 122/255, blue: 122/255))
+                    .frame(width: sqWidth, height: sqHeight)
+                    .position(
+                        x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - evalSquare.column : evalSquare.column),
+                        y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? evalSquare.row : (chessboardModel.rows - 1) - evalSquare.row)
+                    )
+            }
+        }
+        .allowsHitTesting(false)
+    }
+
+    var evaluationIconsView: some View {
+        ZStack {
+            if let evalSquare = chessboardModel.evaluatedSquare, let eval = chessboardModel.moveEvaluation {
+                let sqWidth = chessboardModel.size / CGFloat(chessboardModel.columns)
+                let sqHeight = chessboardModel.size / CGFloat(chessboardModel.rows)
+                let iconSize = min(sqWidth, sqHeight) * 0.22
+                
+                Group {
+                    if eval == .mistake {
+                        Image(systemName: "xmark.circle.fill")
+                            .resizable()
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.black, Color(red: 255/255, green: 122/255, blue: 122/255))
+                            .background(Circle().stroke(Color.black, lineWidth: 1.0))
+                    } else if eval == .blunder {
+                        ZStack {
+                            Circle().fill(Color(red: 255/255, green: 122/255, blue: 122/255))
+                            Circle().stroke(Color.black, lineWidth: 1.5)
+                            Text("??")
+                                .font(.system(size: iconSize * 0.6, weight: .bold, design: .rounded))
+                                .foregroundColor(.black)
+                        }
+                    }
+                }
+                .frame(width: iconSize, height: iconSize)
+                .position(
+                    x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - evalSquare.column : evalSquare.column) + (sqWidth * 0.35),
+                                        y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? evalSquare.row : (chessboardModel.rows - 1) - evalSquare.row) + (sqHeight * 0.35)
+                                    )
+            }
+        }
+        .allowsHitTesting(false)
     }
 }
 
