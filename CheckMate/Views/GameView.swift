@@ -93,8 +93,15 @@ struct GameView: View {
                 }
                 .shadow(color: .black.opacity(0.25), radius: 0, x: 0, y: 4)
             }
+            .padding(.leading, 16)
+            .padding(.trailing, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 16)
+
+
         }
         .ignoresSafeArea()
+        
     }
 }
 
