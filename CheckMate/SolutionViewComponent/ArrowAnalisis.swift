@@ -17,12 +17,12 @@ struct ArrowAnalisis: View {
     var body: some View {
         VStack(spacing: -1) {
             arrowHead
-                .fill(.arrow)
+                .fill(.arrow).opacity(0.5)
                 .frame(width: 11.02, height: 15)
             
             Rectangle()
                 .frame(width: 5, height: 149)
-                .foregroundColor(.arrow)
+                .foregroundColor(.arrow).opacity(0.5)
         }
     }
 }

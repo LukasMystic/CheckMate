@@ -18,7 +18,7 @@
 		998AA2192FA8869300176FD8 /* Inter_18pt-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter_18pt-Regular.ttf"; sourceTree = "<group>"; };
 		998AA21A2FA8869300176FD8 /* Inter_28pt-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter_28pt-Bold.ttf"; sourceTree = "<group>"; };
 		998AA21B2FA8869300176FD8 /* Inter_18pt-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter_18pt-SemiBold.ttf"; sourceTree = "<group>"; };
-		998AA2202FA886CA00176FD8 /* CheckMate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = CheckMate.app; path = "/Users/annya/Documents/CheckMate/build/Debug-iphoneos/CheckMate.app"; sourceTree = "<absolute>"; };
+		998AA2432FA89B7600176FD8 /* CheckMate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CheckMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -60,6 +60,7 @@
 			children = (
 				1203D6F72F9F4CA600211CCC /* CheckMate */,
 				998AA2182FA8869300176FD8 /* Products */,
+				998AA2432FA89B7600176FD8 /* CheckMate.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -97,7 +98,7 @@
 				D1AFE4662FA087C9000FC56A /* ChessboardKit */,
 			);
 			productName = CheckMate;
-			productReference = 998AA2202FA886CA00176FD8 /* CheckMate.app */;
+			productReference = 998AA2432FA89B7600176FD8 /* CheckMate.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */

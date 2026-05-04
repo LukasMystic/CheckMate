@@ -66,10 +66,7 @@ struct SolutionView: View {
                 
                 DownButton()
             }
-            .padding(.leading, 16)
-            .padding(.trailing, 16)
-            .padding(.top, 16)
-            .padding(.bottom, 16)
+            .padding(16)
         }
         .ignoresSafeArea()
         

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct GameView: View {
+    
     let backgroundGradient = Color("BackgroundColor")
     
     var body: some View {
@@ -26,7 +27,7 @@ struct GameView: View {
                             .font(.custom("Inter28pt-Bold", size: 28))
                             .foregroundStyle(Color("FontColor"))
                     }
-
+                    
                     HStack {
                         Button {
                             print("Map Button Tapped")
@@ -38,7 +39,7 @@ struct GameView: View {
                         .frame(width: 59, height: 59)
                         .glassEffect()
                         .shadow(color: .black.opacity(0.25), radius: 0, x: 0, y: 4)
-
+                        
                         Spacer()
                         
                         SoundButton()
@@ -51,16 +52,16 @@ struct GameView: View {
                 ZStack {
                     Text("Life Feedback and everything else that you talk you know")
                         .font(.subheadline)
-                                .padding(.vertical, 10)
-                                .padding(.trailing, 10)
-                                .padding(.leading, 50)
-                                .frame(maxWidth: 300)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 13)
-                                        .foregroundColor(.white)
-                                        .shadow(color: .black.opacity(0.25), radius: 0, x: 0, y: 4)
-                                )
-                                .offset(x: 20)
+                        .padding(.vertical, 10)
+                        .padding(.trailing, 10)
+                        .padding(.leading, 50)
+                        .frame(maxWidth: 300)
+                        .background(
+                            RoundedRectangle(cornerRadius: 13)
+                                .foregroundColor(.white)
+                                .shadow(color: .black.opacity(0.25), radius: 0, x: 0, y: 4)
+                        )
+                        .offset(x: 20)
                     
                     FaceView(face: .best)
                         .frame(width: 100, height: 100)
@@ -73,7 +74,7 @@ struct GameView: View {
                     ChessBoard()
                 }
                 .padding(.bottom, 15)
-
+                
                 //undo and solution
                 VStack {
                     SolutionButton()
@@ -93,15 +94,18 @@ struct GameView: View {
                 }
                 .shadow(color: .black.opacity(0.25), radius: 0, x: 0, y: 4)
             }
-            .padding(.leading, 16)
-            .padding(.trailing, 16)
-            .padding(.top, 16)
-            .padding(.bottom, 16)
-
-
+            .padding(16)
         }
         .ignoresSafeArea()
-        
+        .overlay {
+            if Level1.status == true {
+                ZStack {
+                    Color.background.opacity(0.72)
+                        .ignoresSafeArea()
+                    WinPopUpView()
+                }
+            }
+        }
     }
 }
 

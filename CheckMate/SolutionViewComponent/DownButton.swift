@@ -9,9 +9,7 @@ import SwiftUI
 
 struct DownButton: View {
     
-    @State var conditionGame = "Win"
-    @State var lastPage = true
-    
+    @State var lastPage = true    
     var body: some View {
         
         HStack {
@@ -39,7 +37,7 @@ struct DownButton: View {
                 .frame(width: 59, height: 59)
                 .glassEffect()
                 .shadow(color: .black.opacity(0.25), radius: 0, x: 0, y: 4)
-            } else if lastPage && conditionGame == "Win" {
+            } else if lastPage && Level1.status == true {
                 Button {
                     print("Next Level Button Tapped")
                 } label: {
@@ -70,5 +68,5 @@ struct DownButton: View {
 }
 
 #Preview {
-    DownButton(conditionGame: "Win", lastPage: true)
+    DownButton(lastPage: true)
 }
