@@ -22,9 +22,6 @@ struct AnalysisStep {
     let isPlayerMove: Bool
 }
 
-
-
-
 struct ContentView: View {
     @State var chessboardModel: ChessboardModel
     @State var fenHistory: [String]
@@ -34,7 +31,6 @@ struct ContentView: View {
     @State var currentNode: PuzzleNode
     @State var feedbacktext: String = "Find the best move for white"
     @State var moveEvaluation: MoveEvaluation? = nil
-    
     
     // for tracker & analysis
     @State var currentMode: PuzzleMode = .playing
@@ -48,10 +44,7 @@ struct ContentView: View {
     
     @State var currentLevelId: Int = 1
     
-    
-    
     init() {
-        
         let level: PuzzleLevel
         do{
             level = try PuzzleLevel.load(fromBundle: "Level1")
@@ -59,7 +52,6 @@ struct ContentView: View {
         catch{
             fatalError("Could not load Level1.json: \(error)")
         }
-        
         
         Board.columns = level.columns
         Board.rows = level.rows
@@ -69,7 +61,6 @@ struct ContentView: View {
         
         _feedbacktext = State(initialValue: level.objective)
         
-        
         _chessboardModel = State(
             initialValue: ChessboardModel(fen: level.initialFEN, rows: level.rows, columns: level.columns)
         )
@@ -77,17 +68,17 @@ struct ContentView: View {
     }
     
     var body: some View {
-        VStack{
+        VStack {
             
-            if let eval = moveEvaluation{
+            if let eval = moveEvaluation {
                 Text(eval.rawValue)
                     .font(.title2).bold()
                     .foregroundColor(eval == .brilliant || eval == .best ? .green : .red)
-                
             }
             Text(feedbacktext).padding()
+            
             HStack {
-                if currentMode == .playing && mistakeCount >= 5{
+                if currentMode == .playing && mistakeCount >= 5 {
                     Button (action: {
                         hasGivenUp = true
                         startAnalysis()
@@ -98,62 +89,64 @@ struct ContentView: View {
                             .background(Color.red)
                             .cornerRadius(8)
                     }
-                    
                 }
                 else if currentMode == .puzzleComplete {
-                    Button ("Start Analysis")
-                    {
+                    Button ("Start Analysis") {
                         startAnalysis()
                     }
                     Spacer()
                     
                     if hasGivenUp {
-                        Button ("Retry Level")
-                        {
+                        Button("Retry Level") {
                             retryLevel()
                         }
                         .foregroundStyle(.orange)
-                        
                     } else {
-                        Button ("Next Level"){
-                            loadLevel(currentLevelId + 1)
+                        if currentLevelId < 5 {
+                            Button("Next Level") {
+                                loadLevel(currentLevelId + 1)
+                            }
+                        } else {
+                            Text("🎉 You beat all puzzles!")
+                                .foregroundColor(.green)
+                                .bold()
                         }
                     }
                 }
                 else if currentMode == .analysis {
-                    HStack(spacing:20){
-                        Button("Restart"){
+                    HStack(spacing:20) {
+                        Button("Restart") {
                             startAnalysis()
                         }
                         if analysisIndex > 0 {
-                            Button("Previous Move"){
+                            Button("Previous Move") {
                                 previousAnalysisStep()
                             }
                         }
                     }
                     
                     Spacer()
-                    if analysisIndex >= analysisSteps.count{
+                    
+                    if analysisIndex >= analysisSteps.count {
                         if hasGivenUp {
-                            Button ("Retry Level"){
+                            Button ("Retry Level") {
                                 retryLevel()
                             }
                             .foregroundStyle(.orange)
                         } else {
-                            Button("Next Level")
-                            {
-                                loadLevel(currentLevelId + 1)
+                            if currentLevelId < 5 {
+                                Button("Next Level") {
+                                    loadLevel(currentLevelId + 1)
+                                }
+                            } else {
+                                Text("🎉 You beat all puzzles!")
+                                    .foregroundColor(.green)
+                                    .bold()
                             }
-                        }
-                    } else {
-                        Button ("Next Move"){
-                            nextAnalysisStep()
                         }
                     }
                 }
-                
             }
-            
             .padding(.horizontal, 40)
             .padding(.bottom)
             
@@ -162,7 +155,7 @@ struct ContentView: View {
                     if currentMode != .playing {
                         return
                     }
-                    if !isLegal {return}
+                    if !isLegal { return }
                     
                     chessboardModel.game.make(move: move)
                     let newFen = FenSerialization.default.serialize(position: chessboardModel.game.position)
@@ -171,28 +164,21 @@ struct ContentView: View {
                     fenHistory.append(newFen)
                     
                     evaluateMove(lan: lan)
-                    
                 }
-            
-            // drawing arrow
                 .overlay {
-                    if (currentMode == .playing && (moveEvaluation == .blunder || moveEvaluation == .mistake)) || currentMode == .analysis{
-                        ForEach(currentArrows, id: \.self) {
-                            arrowLAN in
+                    if (currentMode == .playing && (moveEvaluation == .blunder || moveEvaluation == .mistake)) || currentMode == .analysis {
+                        ForEach(currentArrows, id: \.self) { arrowLAN in
                             ArrowOverlay(lan: arrowLAN.trimmingCharacters(in: .whitespaces), columns: chessboardModel.columns, rows: chessboardModel.rows, shouldFlip: chessboardModel.shouldFlipBoard)
                                 .allowsHitTesting(false)
-                            
                         }
                         
-                        if currentMode == .playing
-                        {
+                        if currentMode == .playing {
                             Color.white.opacity(0.001)
                                 .onTapGesture {
                                     undo()
                                 }
                         }
                     }
-                    
                 }
                 .frame(width: 400, height: 400)
                 .id(currentLevelId)
@@ -202,14 +188,13 @@ struct ContentView: View {
     
     private func evaluateMove(lan: String){
         currentArrows = []
-        if let outcome = currentNode.expectedMoves[lan]{
+        if let outcome = currentNode.expectedMoves[lan] {
             moveEvaluation = outcome.evaluation
             feedbacktext = outcome.feedback
             
             if outcome.evaluation == .brilliant || outcome.evaluation == .best {
                 if let cpuLANString = outcome.cpuReplyLAN {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6)
-                    {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                         // make cpu move from JSON
                         let cpuLAN = cpuLANString.components(separatedBy: ",").first ?? cpuLANString
                         
@@ -229,16 +214,12 @@ struct ContentView: View {
                             feedbacktext = "Puzzle Completed!"
                         }
                         moveEvaluation = nil
-                        
-                        
                     }
-                    
                 }
                 else {
                     currentMode = .puzzleComplete
                     feedbacktext = outcome.feedback + "\nPuzzle Completed!"
                 }
-                
             }
             else {
                 mistakeCount += 1
@@ -247,26 +228,22 @@ struct ContentView: View {
                 }
                 feedbacktext += "\nTap on the board to undo"
             }
-            
         }
         else {
             mistakeCount += 1
             moveEvaluation = .mistake
             feedbacktext = "That's not the best move. Try again"
-            
         }
     }
-    
+
     private func undo() {
         guard let startFEN = fenHistory.first else {return}
         
         let playerColor = FenSerialization.default.deserialize(fen: startFEN).state.turn
-        
         let currentFEN = chessboardModel.turn
         
-        // if it's from player then undo 1 move, if it's from engine then undo 2
         let moves = (currentFEN == playerColor) ? 2 : 1
-        guard fenHistory.count > moves else {return} // just in case
+        guard fenHistory.count > moves else {return}
         
         fenHistory.removeLast(moves)
         
@@ -276,7 +253,6 @@ struct ContentView: View {
         moveEvaluation =  nil
         currentArrows = []
         feedbacktext = currentLevel.objective
-        
     }
     
     private func loadLevel(_ id: Int){
@@ -284,11 +260,9 @@ struct ContentView: View {
         do {
             let nextLevel = try PuzzleLevel.load(fromBundle: levelName)
             
-            // adjust board
             Board.columns = nextLevel.columns
             Board.rows = nextLevel.rows
             
-            // update state
             currentLevelId = id
             currentLevel = nextLevel
             feedbacktext = currentLevel.objective
@@ -297,21 +271,17 @@ struct ContentView: View {
             chessboardModel = ChessboardModel(fen: nextLevel.initialFEN, rows: nextLevel.rows, columns: nextLevel.columns)
             fenHistory = [nextLevel.initialFEN]
             
-            // reset everything :)
             moveEvaluation = nil
             currentArrows = []
             mistakeCount = 0
             hasGivenUp = false
             currentMode = .playing
             
-            
-            
         } catch {
             feedbacktext = "Congratulations! You've found a bug!"
         }
     }
     
-    // retry level
     private func retryLevel() {
         chessboardModel.game = Game(position: FenSerialization.default.deserialize(fen: currentLevel.initialFEN))
         chessboardModel.setFen(currentLevel.initialFEN)
@@ -326,10 +296,7 @@ struct ContentView: View {
         mistakeCount = 0
         hasGivenUp = false
         currentMode = .playing
-        
     }
-    
-    // post analysis
     
     private func extractGoldenPath(from node: PuzzleNode) -> [AnalysisStep] {
         var steps: [AnalysisStep] = []
@@ -342,7 +309,6 @@ struct ContentView: View {
             if let cpuLAN = correctMove.value.cpuReplyLAN {
                 let firstCPULAN = cpuLAN.components(separatedBy: ",").first ?? cpuLAN
                 steps.append(AnalysisStep(moveLAN: firstCPULAN, evaluation: nil, feedback: "The opponent's forced response.", isPlayerMove: false))
-                
             }
             if let nextNode = correctMove.value.nextNode {
                 steps.append(contentsOf: extractGoldenPath(from: nextNode))
@@ -351,6 +317,7 @@ struct ContentView: View {
         
         return steps
     }
+    
     private func startAnalysis() {
         currentMode = .analysis
         analysisSteps = extractGoldenPath(from: currentLevel.rootNode)
@@ -370,58 +337,46 @@ struct ContentView: View {
         let newFen = FenSerialization.default.serialize(position: chessboardModel.game.position)
         chessboardModel.setFen(newFen, lan: step.moveLAN)
         
-        
         currentArrows = [step.moveLAN]
         moveEvaluation = step.evaluation
         feedbacktext = step.feedback
         analysisIndex += 1
         
         if analysisIndex >= analysisSteps.count {
-            feedbacktext += "Analysis Complete"
+            feedbacktext += "\nAnalysis Complete"
         }
     }
     
-    // undo button for analysis
     private func previousAnalysisStep() {
         guard analysisIndex > 0 else { return }
         
         analysisIndex -= 1
         
-        // reset board
         chessboardModel.game = Game(position: FenSerialization.default.deserialize(fen: currentLevel.initialFEN))
         chessboardModel.setFen(currentLevel.initialFEN)
         
-        if analysisIndex == 0{
+        if analysisIndex == 0 {
             moveEvaluation = nil
             feedbacktext = "Analysis Mode: Tap 'Next move' "
             currentArrows = []
-            
         } else {
-            // reapply moves
             for i in 0..<analysisIndex {
                 let step = analysisSteps[i]
                 chessboardModel.game.make(move: Move(string: step.moveLAN))
                 let newFen = FenSerialization.default.serialize(position: chessboardModel.game.position)
                 chessboardModel.setFen(newFen, lan: step.moveLAN)
-                
             }
             let currentStep = analysisSteps[analysisIndex - 1]
             currentArrows = [currentStep.moveLAN]
             moveEvaluation = currentStep.evaluation
             feedbacktext = currentStep.feedback
         }
-        
     }
-    
 }
-
-
 
 #Preview {
     ContentView()
 }
-
-// arrow design (sadly hardcoded first)
 
 // MARK: - Arrow Drawing Views
 
@@ -451,16 +406,13 @@ struct ArrowOverlay: View {
         }
     }
     
-    /// Converts a square coordinate like "b2" into a graphical CGPoint
     func point(for square: String, sqWidth: CGFloat, sqHeight: CGFloat) -> CGPoint {
         guard square.count >= 2 else { return .zero }
         
         let fileChar = square.first!
         let rankChar = square.last!
         
-        // Convert 'a' -> 0, 'b' -> 1
         let file = Int(fileChar.asciiValue! - Character("a").asciiValue!)
-        // Convert '1' -> 0, '2' -> 1
         let rank = Int(String(rankChar))! - 1
         
         let col = shouldFlip ? (columns - 1) - file : file
@@ -500,4 +452,3 @@ struct ArrowHead: Shape {
         return path
     }
 }
-

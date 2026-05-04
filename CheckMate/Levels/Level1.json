@@ -1,39 +1,42 @@
 {
   "id": 1,
-  "objective": "Find the Mate in 2 for White.",
+  "objective": "Find the Mate in 1 for White.",
   "columns": 4,
   "rows": 4,
   "initialFEN": "KBrk/N1pp/qb2/1QR1 w - - 0 1",
   "rootNode": {
     "expectedMoves": {
+      
+      "a3c2": {
+        "evaluation": "Brilliant",
+        "feedback": "Smothered mate! The knight perfectly traps the king.",
+        "cpuReplyLAN": null
+      },
+      
       "b1d3": {
-        "evaluation": "Brilliant!",
-        "feedback": "Brilliant! You sacrifice the Queen to lure the King into a mating net.",
-        "cpuReplyLAN": "d4d3",
-        "nextNode": {
-          "expectedMoves": {
-            "c1d1": {
-              "evaluation": "Best Move",
-              "feedback": "Checkmate! The Rook cuts off the d-file, and the Bishop and Knight cover escapes."
-            }
-          }
-        }
+        "evaluation": "Blunder",
+        "feedback": "Sacrificing the Queen fails. Black's King just recaptures.",
+        "cpuReplyLAN": "d4d3"
       },
-      "b1a1": {
-        "evaluation": "Mistake",
-        "feedback": "The bishop captures your queen. Then the pawn drops.",
-        "cpuReplyLAN": "b2a1,d3d1"
-      },
+      
       "b1a2": {
         "evaluation": "Mistake",
-        "feedback": "The bishop ignores your queen and takes your rook.",
-        "cpuReplyLAN": "b2c1"
+        "feedback": "Trading your queen for theirs loses your attacking advantage.",
+        "cpuReplyLAN": "b4c1"
       },
+      
       "b1b2": {
         "evaluation": "Mistake",
-        "feedback": "The pawn structure crushes your attack.",
+        "feedback": "Capturing the bishop doesn't lead to mate.",
         "cpuReplyLAN": "c3b2"
+      },
+      
+      "c1c3": {
+        "evaluation": "Blunder",
+        "feedback": "Sacrificing the rook allows Black's Queen to infiltrate.",
+        "cpuReplyLAN": "a2b1"
       }
+      
     }
   }
 }

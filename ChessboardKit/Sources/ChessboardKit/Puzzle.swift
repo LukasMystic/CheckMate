@@ -10,7 +10,7 @@ import Foundation
 // models
 public enum MoveEvaluation: String, Sendable, Codable{
     case best =  "Best Move"
-    case brilliant = "Brilliant!"
+    case brilliant = "Brilliant"
     case blunder = "Blunder"
     case correct = "Correct"
     case good = "Good"
