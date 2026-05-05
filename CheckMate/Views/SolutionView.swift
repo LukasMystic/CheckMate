@@ -69,7 +69,6 @@ struct SolutionView: View {
             .padding(16)
         }
         .ignoresSafeArea()
-        
     }
 }
 
