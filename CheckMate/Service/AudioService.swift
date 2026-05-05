@@ -29,7 +29,7 @@ class AudioService {
             return
         }
         
-        if let sound = Bundle.main.path(forResource: "background3", ofType: "mp3") {
+        if let sound = Bundle.main.path(forResource: "background", ofType: "mp3") {
           do {
             self.backgroundAudioPlayer = try AVAudioPlayer(contentsOf: URL(fileURLWithPath: sound))
               self.backgroundAudioPlayer?.numberOfLoops = -1
