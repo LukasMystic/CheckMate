@@ -31,6 +31,7 @@ struct CheckMateApp: App {
                         .transition(.opacity) 
                 }
             }
+            .preferredColorScheme(.light)
         }
     }
 }
