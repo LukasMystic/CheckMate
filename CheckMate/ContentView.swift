@@ -53,8 +53,9 @@ struct ContentView: View {
     init(levelId: Int = 1) {
         
         let level: PuzzleLevel
+        let levelName = "Level\(levelId)"
         do{
-            level = try PuzzleLevel.load(fromBundle: "Level1")
+            level = try PuzzleLevel.load(fromBundle: levelName)
         }
         catch{
             fatalError("Could not load Level1.json: \(error)")
