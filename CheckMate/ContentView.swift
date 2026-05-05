@@ -81,134 +81,178 @@ struct ContentView: View {
     }
     
     var body: some View {
-        VStack{
-            
-            Text(moveEvaluation?.rawValue ?? " ")
-                .font(.title2).bold()
-                .foregroundColor((moveEvaluation == .brilliant || moveEvaluation == .best) ? .green : .red)
-                .opacity(moveEvaluation == nil ? 0 : 1)
-                .padding(.top)
-            Text(feedbacktext)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-                .frame(height: 60)
-            HStack {
-                if currentMode == .playing && mistakeCount >= 5{
-                    Button (action: {
-                        hasGivenUp = true
-                        startAnalysis()
-                    }) {
-                        Text("Give up / Solution")
-                            .foregroundColor(.white)
-                            .padding(10)
-                            .background(Color.red)
-                            .cornerRadius(8)
-                    }
-                    
-                }
-                else if currentMode == .puzzleComplete {
-                    Button ("Start Analysis")
-                    {
-                        startAnalysis()
-                    }
-                    Spacer()
-                    
-                    if hasGivenUp {
-                        Button ("Retry Level")
-                        {
-                            retryLevel()
-                        }
-                        .foregroundStyle(.orange)
-                        
-                    } else {
-                        Button ("Next Level"){
-                            loadLevel(currentLevelId + 1)
-                        }
-                    }
-                }
-                else if currentMode == .analysis {
-                    HStack(spacing:20){
-                        Button("Restart"){
-                            startAnalysis()
-                        }
-                        if analysisIndex > 0 {
-                            Button("Previous Move"){
-                                previousAnalysisStep()
-                            }
-                        }
-                    }
-                    
-                    Spacer()
-                    if analysisIndex >= analysisSteps.count{
-                        if hasGivenUp {
-                            Button ("Retry Level"){
-                                retryLevel()
-                            }
-                            .foregroundStyle(.orange)
-                        } else {
-                            Button("Next Level")
-                            {
-                                loadLevel(currentLevelId + 1)
-                            }
-                        }
-                    } else {
-                        Button ("Next Move"){
-                            nextAnalysisStep()
-                        }
-                    }
-                }
+        ZStack {
+            // MAIN CONTENT
+            VStack{
+                Text(moveEvaluation?.rawValue ?? " ")
+                    .font(.title2).bold()
+                    .foregroundColor((moveEvaluation == .brilliant || moveEvaluation == .best) ? .green : .red)
+                    .opacity(moveEvaluation == nil ? 0 : 1)
+                    .padding(.top)
                 
-            }
-            .frame(height: 50)
-            .padding(.horizontal, 40)
-            .padding(.bottom)
-            
-            
-            
-            Chessboard(chessboardModel: chessboardModel)
-            
-                .onMove { move, isLegal, from, to, lan, promotionPiece in
-                    if currentMode != .playing {
-                        return
+                Text(feedbacktext)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+                    .frame(height: 60)
+                
+                HStack {
+                    if currentMode == .playing && mistakeCount >= 5{
+                        Button (action: {
+                            hasGivenUp = true
+                            startAnalysis()
+                        }) {
+                            Text("Give up / Solution")
+                                .foregroundColor(.white)
+                                .padding(10)
+                                .background(Color.red)
+                                .cornerRadius(8)
+                        }
                     }
-                    if !isLegal {return}
-                    
-                    chessboardModel.game.make(move: move)
-                    let newFen = FenSerialization.default.serialize(position: chessboardModel.game.position)
-                    
-                    chessboardModel.setFen(newFen, lan: lan)
-                    fenHistory.append(newFen)
-                    
-                    evaluateMove(lan: lan)
-                    
-                }
-                .disabled(currentMode != .playing)
-            
-            // drawing arrow
-                .overlay {
-                    if (currentMode == .playing && (moveEvaluation == .blunder || moveEvaluation == .mistake)) || currentMode == .analysis{
-                        ForEach(currentArrows, id: \.self) {
-                            arrowLAN in
-                            ArrowOverlay(lan: arrowLAN.trimmingCharacters(in: .whitespaces), columns: chessboardModel.columns, rows: chessboardModel.rows, shouldFlip: chessboardModel.shouldFlipBoard)
-                                .allowsHitTesting(false)
-                            
+                    // puzzle complete condition moved to Modal
+                    else if currentMode == .analysis {
+                        HStack(spacing:20){
+                            Button("Restart"){
+                                startAnalysis()
+                            }
+                            if analysisIndex > 0 {
+                                Button("Previous Move"){
+                                    previousAnalysisStep()
+                                }
+                            }
                         }
                         
-                        if currentMode == .playing
-                        {
-                            Color.white.opacity(0.001)
-                                .onTapGesture {
-                                    undo()
+                        Spacer()
+                        
+                        if analysisIndex >= analysisSteps.count{
+                            if hasGivenUp {
+                                Button ("Retry Level"){
+                                    retryLevel()
                                 }
+                                .foregroundStyle(.orange)
+                            } else {
+                                Button("Next Level")
+                                {
+                                    loadLevel(currentLevelId + 1)
+                                }
+                            }
+                        } else {
+                            Button ("Next Move"){
+                                nextAnalysisStep()
+                            }
                         }
                     }
-                    
                 }
+                .frame(height: 50)
+                .padding(.horizontal, 40)
+                .padding(.bottom)
+                
+                Chessboard(chessboardModel: chessboardModel)
+                    .onMove { move, isLegal, from, to, lan, promotionPiece in
+                        if currentMode != .playing { return }
+                        if !isLegal { return }
+                        
+                        chessboardModel.game.make(move: move)
+                        let newFen = FenSerialization.default.serialize(position: chessboardModel.game.position)
+                        
+                        chessboardModel.setFen(newFen, lan: lan)
+                        fenHistory.append(newFen)
+                        
+                        evaluateMove(lan: lan)
+                    }
+                    .disabled(currentMode != .playing)
+                    // drawing arrow
+                    .overlay {
+                        if (currentMode == .playing && (moveEvaluation == .blunder || moveEvaluation == .mistake)) || currentMode == .analysis {
+                            ForEach(currentArrows, id: \.self) { arrowLAN in
+                                ArrowOverlay(lan: arrowLAN.trimmingCharacters(in: .whitespaces), columns: chessboardModel.columns, rows: chessboardModel.rows, shouldFlip: chessboardModel.shouldFlipBoard)
+                                    .allowsHitTesting(false)
+                            }
+                            
+                            if currentMode == .playing {
+                                Color.white.opacity(0.001)
+                                    .onTapGesture {
+                                        undo()
+                                    }
+                            }
+                        }
+                    }
+                    .frame(width: 400, height: 400)
+                    .id(currentLevelId)
+            }
             
-                .frame(width: 400, height: 400)
-                .id(currentLevelId)
-            
+            // card modal design
+            if currentMode == .puzzleComplete {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                
+                // Card View
+                VStack(spacing: 20) {
+                    Image(systemName: hasGivenUp ? "flag.fill" : "trophy.fill")
+                        .font(.system(size: 60))
+                        .foregroundStyle(hasGivenUp ? .gray : .yellow)
+                        .padding(.top, 10)
+                    
+                    Text(hasGivenUp ? "Level Solved" : "Puzzle Completed!")
+                        .font(.title)
+                        .fontWeight(.heavy)
+                        .foregroundColor(.primary)
+                    
+                    Text(feedbacktext.replacingOccurrences(of: "\nPuzzle Completed!", with: ""))
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    
+                    HStack(spacing: 15) {
+                        Button(action: {
+                            startAnalysis()
+                        }) {
+                            Text("Analysis")
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .cornerRadius(12)
+                        }
+                        
+                        if hasGivenUp {
+                            Button(action: {
+                                retryLevel()
+                            }) {
+                                Text("Retry")
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.orange)
+                                    .cornerRadius(12)
+                            }
+                        } else {
+                            Button(action: {
+                                loadLevel(currentLevelId + 1)
+                            }) {
+                                Text("Next Level")
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.green)
+                                    .cornerRadius(12)
+                            }
+                        }
+                    }
+                    .padding(.top, 10)
+                }
+                .padding(25)
+                .background(Color(uiColor: .systemBackground))
+                .cornerRadius(25)
+                .shadow(color: .black.opacity(0.2), radius: 15, x: 0, y: 10)
+                .padding(.horizontal, 35)
+                .transition(.scale(scale: 0.8).combined(with: .opacity)) // transition animation
+            }
         }
+        .animation(.spring(response: 0.5, dampingFraction: 0.6), value: currentMode)
     }
     
     private func evaluateMove(lan: String){
