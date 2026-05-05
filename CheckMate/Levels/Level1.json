@@ -3,7 +3,7 @@
   "objective": "Find the Mate in 2 for White.",
   "columns": 4,
   "rows": 4,
-  "initialFEN": "KBrk/N1pp/qb2/1QR1 w - - 0 1",
+  "initialFEN": "KBrk/N1pb/qb2/1QR1 w - - 0 1",
   "rootNode": {
     "expectedMoves": {
       "b1d3": {
@@ -27,7 +27,7 @@
       "b1a2": {
         "evaluation": "Mistake",
         "feedback": "The bishop ignores your queen and takes your rook.",
-        "cpuReplyLAN": "b2c1"
+        "cpuReplyLAN": "b2c1,d3c4"
       },
       "b1b2": {
         "evaluation": "Mistake",

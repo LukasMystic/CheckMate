@@ -1,0 +1,25 @@
+{
+  "id": 5,
+  "objective": "Black to move. Find the Mate in 1.",
+  "columns": 4,
+  "rows": 4,
+  "initialFEN": "rNqk/P1bp/PnnQ/NKRR b - - 0 1",
+  "rootNode": {
+    "expectedMoves": {
+      "c2a3": {
+        "evaluation": "Brilliant!",
+        "feedback": "Checkmate! The Knight jumps in and White is completely smothered."
+      },
+      "b2d1": {
+        "evaluation": "Blunder",
+        "feedback": "Wrong Knight! Capturing the rook here doesn't deliver a check.",
+        "cpuReplyLAN": "c1d1"
+      },
+      "d4b4": {
+        "evaluation": "Blunder",
+        "feedback": "Sacrificing your Queen loses your massive advantage.",
+        "cpuReplyLAN": "a3b4"
+      }
+    }
+  }
+}

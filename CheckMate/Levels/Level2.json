@@ -19,7 +19,7 @@
             "c1b2": {
               "evaluation": "Blunder",
               "feedback": "Capturing the pawn blocks your own checkmate.",
-              "cpuReplyLAN": "a4b2"
+              "cpuReplyLAN": "a4c2"
             },
             "c1b3": {
               "evaluation": "Mistake",
