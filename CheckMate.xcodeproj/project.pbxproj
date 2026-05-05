@@ -7,17 +7,36 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		998AA21C2FA8869300176FD8 /* Inter_28pt-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 998AA21A2FA8869300176FD8 /* Inter_28pt-Bold.ttf */; };
+		998AA21E2FA8869300176FD8 /* Inter_18pt-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 998AA21B2FA8869300176FD8 /* Inter_18pt-SemiBold.ttf */; };
+		998AA21F2FA8869300176FD8 /* Inter_18pt-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 998AA2192FA8869300176FD8 /* Inter_18pt-Regular.ttf */; };
 		D1AFE4642FA087C2000FC56A /* ChessKit in Frameworks */ = {isa = PBXBuildFile; productRef = D1AFE4632FA087C2000FC56A /* ChessKit */; };
 		D1AFE4672FA087C9000FC56A /* ChessboardKit in Frameworks */ = {isa = PBXBuildFile; productRef = D1AFE4662FA087C9000FC56A /* ChessboardKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1203D6F52F9F4CA600211CCC /* CheckMate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CheckMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		998AA2192FA8869300176FD8 /* Inter_18pt-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter_18pt-Regular.ttf"; sourceTree = "<group>"; };
+		998AA21A2FA8869300176FD8 /* Inter_28pt-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter_28pt-Bold.ttf"; sourceTree = "<group>"; };
+		998AA21B2FA8869300176FD8 /* Inter_18pt-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter_18pt-SemiBold.ttf"; sourceTree = "<group>"; };
+		998AA2432FA89B7600176FD8 /* CheckMate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CheckMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		998AA2222FA886CE00176FD8 /* Exceptions for "CheckMate" folder in "CheckMate" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 1203D6F42F9F4CA600211CCC /* CheckMate */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		1203D6F72F9F4CA600211CCC /* CheckMate */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				998AA2222FA886CE00176FD8 /* Exceptions for "CheckMate" folder in "CheckMate" target */,
+			);
 			path = CheckMate;
 			sourceTree = "<group>";
 		};
@@ -40,14 +59,17 @@
 			isa = PBXGroup;
 			children = (
 				1203D6F72F9F4CA600211CCC /* CheckMate */,
-				1203D6F62F9F4CA600211CCC /* Products */,
+				998AA2182FA8869300176FD8 /* Products */,
+				998AA2432FA89B7600176FD8 /* CheckMate.app */,
 			);
 			sourceTree = "<group>";
 		};
-		1203D6F62F9F4CA600211CCC /* Products */ = {
+		998AA2182FA8869300176FD8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1203D6F52F9F4CA600211CCC /* CheckMate.app */,
+				998AA2192FA8869300176FD8 /* Inter_18pt-Regular.ttf */,
+				998AA21A2FA8869300176FD8 /* Inter_28pt-Bold.ttf */,
+				998AA21B2FA8869300176FD8 /* Inter_18pt-SemiBold.ttf */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -76,7 +98,7 @@
 				D1AFE4662FA087C9000FC56A /* ChessboardKit */,
 			);
 			productName = CheckMate;
-			productReference = 1203D6F52F9F4CA600211CCC /* CheckMate.app */;
+			productReference = 998AA2432FA89B7600176FD8 /* CheckMate.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -108,7 +130,7 @@
 				D1AFE4652FA087C9000FC56A /* XCLocalSwiftPackageReference "ChessboardKit" */,
 			);
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 1203D6F62F9F4CA600211CCC /* Products */;
+			productRefGroup = 1203D6EC2F9F4CA600211CCC;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -122,6 +144,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				998AA21C2FA8869300176FD8 /* Inter_28pt-Bold.ttf in Resources */,
+				998AA21E2FA8869300176FD8 /* Inter_18pt-SemiBold.ttf in Resources */,
+				998AA21F2FA8869300176FD8 /* Inter_18pt-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,6 +296,7 @@
 				DEVELOPMENT_TEAM = 5MRHN4782T;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CheckMate/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -303,6 +329,7 @@
 				DEVELOPMENT_TEAM = 5MRHN4782T;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CheckMate/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

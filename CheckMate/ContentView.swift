@@ -23,8 +23,6 @@ struct AnalysisStep {
 }
 
 
-
-
 struct ContentView: View {
     @State var chessboardModel: ChessboardModel
     @State var fenHistory: [String]
