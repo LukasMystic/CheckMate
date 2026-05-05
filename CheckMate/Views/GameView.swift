@@ -78,7 +78,7 @@ struct GameView: View {
                 //undo and solution
                 VStack {
                     SolutionButton()
-                        .animation(.easeIn(duration: 0.3).repeatCount(1, autoreverses: true), value: scale)
+                        .animation(.bouncy(duration: 0.3).repeatCount(1, autoreverses: true), value: scale)
                                     .onAppear {
                                         scale = 1
                                     }

@@ -28,17 +28,22 @@ struct WinPopUpView: View {
                     .foregroundStyle(Color.arrow)
                 
                 HStack (spacing: 20) {
+                    
                     Button {
                         print("Solution Button Tapped")
                     } label: {
                         Text("Solution")
-                            .font(.custom("Inter18pt-SemiBold", size: 19))
-                            .foregroundStyle(Color(.white))
+                            .font(.custom("Inter18pt-SemiBold", size: 17))
+                        
+                        .foregroundColor(.white)
+                        .frame(width: 128, height: 51)
+                        .background(
+                            RoundedRectangle(cornerRadius: 200)
+                                .fill(Color.accentColor)
+                                .shadow(color: Color.shadow, radius: 0, x: 0, y: 5)
+                        )
                     }
-                    .frame(width: 128, height: 51)
-                    .background(RoundedRectangle(cornerRadius: 200)
-                    .foregroundColor(Color.accent)
-                    .shadow(color:Color.shadow, radius: 0, x: 0, y: 5))
+                    .buttonStyle(GameButtonStyle())
 
                     Button {
                         print("Next Level Button Tapped")
@@ -46,13 +51,17 @@ struct WinPopUpView: View {
                         Image(systemName: "arrow.forward")
                             .font(.title2)
                             .foregroundColor(.black)
+                            .frame(width: 59, height: 59)
+                            .glassEffect()
+                            .contentShape(Circle())
+                            .shadow(color: .black.opacity(0.25), radius: 0, x: 0, y: 4)
                     }
-                    .buttonStyle(.plain)
-                    .frame(width: 59, height: 59)
-                    .glassEffect()
-                    .shadow(color: .black.opacity(0.25), radius: 0, x: 0, y: 4)
+                    .buttonStyle(GameButtonStyle())
+
+                
                 }
             }
+            .zIndex(1)
             .padding(.bottom, 130)
             
             HStack() {
