@@ -12,11 +12,10 @@
         "feedback": "Smothered mate! The knight perfectly traps the king.",
         "cpuReplyLAN": null
       },
-      
-      "b1d3": {
-        "evaluation": "Blunder",
-        "feedback": "Sacrificing the Queen fails. Black's King just recaptures.",
-        "cpuReplyLAN": "d4d3"
+      "b1a1": {
+        "evaluation": "Mistake",
+        "feedback": "The bishop captures your queen. Then the pawn drops.",
+        "cpuReplyLAN": "b2a1"
       },
       
       "b1a2": {
@@ -30,13 +29,26 @@
         "feedback": "Capturing the bishop doesn't lead to mate.",
         "cpuReplyLAN": "c3b2"
       },
-      
-      "c1c3": {
+      "b1c2": {
         "evaluation": "Blunder",
-        "feedback": "Sacrificing the rook allows Black's Queen to infiltrate.",
+        "feedback": "You managed to kill your own king.",
+        "cpuReplyLAN": "a2a3"
+      },
+      "c1c2": {
+        "evaluation": "Blunder",
+        "feedback": "You managed to kill your own king.",
+        "cpuReplyLAN": "a2a3"
+      },
+      "c1c3": {
+        "evaluation": "Mistake",
+        "feedback": "You just donated your Queen to your enemy.",
+        "cpuReplyLAN": "c3b2"
+      },
+      "c1d1": {
+        "evaluation": "Mistake",
+        "feedback": "Too Weak, Too Slow.",
         "cpuReplyLAN": "a2b1"
-      }
-      
+      },
     }
   }
 }
