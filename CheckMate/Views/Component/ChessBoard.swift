@@ -12,6 +12,12 @@ struct ChessBoard: View {
     let blackSquare = Color("AccentColor")
     let boardSize: CGFloat = 344
     let spacing: CGFloat = 5
+    let mistakeSquare = Color("MistakeColor")
+
+    //nanti hubungin sama code kalian buat mistake condition ya
+    @State var mistake: Bool = true
+    @State var rowActive: Int = 1
+    @State var columnActive: Int = 2
     
     let pieces: [[String?]] = [
         [nil, nil, "Piece=Rook, Side=Black", "Piece=King, Side=Black"],
@@ -32,12 +38,29 @@ struct ChessBoard: View {
                             RoundedRectangle(cornerRadius: 11)
                                 .fill((row + column) % 2 == 0 ? whiteSquare : blackSquare)
                             
+                            if mistake {
+                                if rowActive == row && columnActive == column {
+                                        RoundedRectangle(cornerRadius: 11)
+                                            .fill(Color.mistake)
+                                }
+                            }
+                            
                             if let pieceName = pieces[row][column] {
                                 Image(pieceName)
                                     .resizable()
                                     .scaledToFit()
                                     .padding(10)
                             }
+                            
+                            if mistake {
+                                if rowActive == row && columnActive == column {
+                                        Image(systemName:"x.circle.fill")
+                                        .foregroundStyle (.black, Color.mistake)
+                                        .offset(x: 20, y: 20)
+
+                                }
+                            }
+                                                                                
                         }
                         .frame(width: squareSize, height: squareSize)
                     }
