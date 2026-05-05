@@ -107,23 +107,23 @@ public class ChessboardModel {
     
     // evaluation for blunder and or mistake highlight
     public var evaluatedSquare: BoardSquare? = nil
-        public var moveEvaluation: MoveEvaluation? = nil
+    public var moveEvaluation: MoveEvaluation? = nil
+    
+    public func setEvaluation(_ evaluation: MoveEvaluation, for square: String) {
+        guard square.count == 2,
+              let fileChar = square.first,
+              let rankChar = square.last,
+              let file = "abcdefgh".firstIndex(of: fileChar)?.utf16Offset(in: "abcdefgh"),
+              let rank = Int(String(rankChar)) else { return }
         
-        public func setEvaluation(_ evaluation: MoveEvaluation, for square: String) {
-            guard square.count == 2,
-                  let fileChar = square.first,
-                  let rankChar = square.last,
-                  let file = "abcdefgh".firstIndex(of: fileChar)?.utf16Offset(in: "abcdefgh"),
-                  let rank = Int(String(rankChar)) else { return }
-            
-            self.moveEvaluation = evaluation
-            self.evaluatedSquare = BoardSquare(row: rank - 1, column: file)
-        }
-        
-        public func clearEvaluation() {
-            self.moveEvaluation = nil
-            self.evaluatedSquare = nil
-        }
+        self.moveEvaluation = evaluation
+        self.evaluatedSquare = BoardSquare(row: rank - 1, column: file)
+    }
+    
+    public func clearEvaluation() {
+        self.moveEvaluation = nil
+        self.evaluatedSquare = nil
+    }
     
     
     public var onMove: (Move, Bool, String, String, String, PieceKind? ) -> Void = { _, _, _, _, _, _ in }
@@ -665,7 +665,7 @@ public struct Chessboard: View {
         }
         .allowsHitTesting(false)
     }
-
+    
     var evaluationIconsView: some View {
         ZStack {
             if let evalSquare = chessboardModel.evaluatedSquare, let eval = chessboardModel.moveEvaluation {
@@ -693,8 +693,8 @@ public struct Chessboard: View {
                 .frame(width: iconSize, height: iconSize)
                 .position(
                     x: (sqWidth / 2) + sqWidth * CGFloat(chessboardModel.shouldFlipBoard ? (chessboardModel.columns - 1) - evalSquare.column : evalSquare.column) + (sqWidth * 0.35),
-                                        y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? evalSquare.row : (chessboardModel.rows - 1) - evalSquare.row) + (sqHeight * 0.35)
-                                    )
+                    y: (sqHeight / 2) + sqHeight * CGFloat(chessboardModel.shouldFlipBoard ? evalSquare.row : (chessboardModel.rows - 1) - evalSquare.row) + (sqHeight * 0.35)
+                )
             }
         }
         .allowsHitTesting(false)
@@ -986,8 +986,12 @@ private struct ChessPieceView: View {
                 let move = Move(string: lan)
                 let isLegal = chessboardModel.game.legalMoves.contains(move)
                 
-                withAnimation {
+                if isLegal {
                     offset = .zero
+                } else {
+                    withAnimation {
+                        offset = .zero
+                    }
                 }
                 
                 guard let selectedPiece = chessboardModel.game.position.board[square.row + square.column * chessboardModel.rows]
