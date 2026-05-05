@@ -60,9 +60,8 @@ struct LevelRow: View {
                     if state != .locked && state != .current {
                         Text("\(levelNumber)")
                             .fontWeight(.bold)
-                            .foregroundColor(.black)
-                            .offset(y: -2)
                             .foregroundColor(Color("ArrowColor"))
+                            .offset(y: -2)
                     }
                 }
             
@@ -87,8 +86,7 @@ struct LevelView: View {
                     LevelPath(levelNumber: 4, state: .locked, isLast: false)
                     LevelPath(levelNumber: 3, state: .current, isLast: false)
                     LevelPath(levelNumber: 2, state: .passed, isLast: false)
-                    LevelPath(levelNumber: 1, state: .passed, isLast: false)
-                    
+                    LevelPath(levelNumber: 1, state: .current, isLast: false)
                 }
                 .padding(.horizontal, 110)
                 .padding(.bottom, 90)
@@ -99,7 +97,6 @@ struct LevelView: View {
                     LevelRow(levelNumber: 3, state: .current, isLast: false)
                     LevelRow(levelNumber: 2, state: .passed, isLast: false)
                     LevelRow(levelNumber: 1, state: .passed, isLast: false)
-                    
                 }
                 .padding(.horizontal, 110)
                 .padding(.bottom, 90)
@@ -123,25 +120,22 @@ struct LevelView: View {
                 
                 Spacer()
                 
-                
-                
-                Button(action: {
-                    // action
-                }) {
-                    Image("Level Button")
-                        .overlay(
-                            HStack {
-                                Image(systemName: "restart")
-                                    .scaleEffect(x: -1, y: 1)
-                                    .foregroundColor(.white)
-                                
-                                Text("Continue Last Level")
-                                    .foregroundColor(.white)
-                                    .fontWeight(.semibold)
-                            }
-                        )
+                Button {
+                    print("Continue Button Tapped")
+                } label: {
+                    Image(systemName: "restart")
+                        .scaleEffect(x: -1, y: 1)
+                        .foregroundColor(.white)
+                    Text("Continue Last Level")
+                        .font(.custom("Inter18pt-SemiBold", size: 19))
+                        .foregroundStyle(Color(.white))
                 }
+                .frame(width: 330, height: 51)
+                .background(RoundedRectangle(cornerRadius: 200)
+                .foregroundColor(Color.accent)
+                .shadow(color:Color.shadow, radius: 0, x: 0, y: 5))
                 .padding(.bottom, 50)
+                
             }
         }
     }

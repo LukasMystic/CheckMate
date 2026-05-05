@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SplashScreenView: View {
     
-    @State var bgColor = Color.brown
+    @State var bgColor = Color("AccentColor")
     
     @State var ballYOffset: CGFloat = -500
     
@@ -26,7 +26,7 @@ struct SplashScreenView: View {
             Image("Chess Splash")
             
             Circle()
-                .fill(Color.brown)
+                .fill(Color("AccentColor"))
                 .frame(width: 90, height: 90)
                 .offset(x: ballXOffset, y: ballYOffset)
             
