@@ -1,6 +1,6 @@
 {
   "id": 4,
-  "objective": "Find the Mate in 2 for Black.",
+  "objective": "Mate in 2 for Black",
   "columns": 4,
   "rows": 4,
   "initialFEN": "Qbqk/N1pp/PP/KB1R b - - 0 1",

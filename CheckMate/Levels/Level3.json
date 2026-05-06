@@ -1,6 +1,6 @@
 {
   "id": 3,
-  "objective": "Find the Mate in 4 for White.",
+  "objective": "Mate in 4 for White",
   "columns": 4,
   "rows": 4,
   "initialFEN": "1r1k/2pp/Q3/2NK w - - 0 1",
