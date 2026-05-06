@@ -61,7 +61,8 @@ struct ContentView: View {
         do {
             level = try PuzzleLevel.load(fromBundle: levelName)
         } catch {
-            fatalError("Could not load Level1.json: \(error)")
+            print("Could not load \(levelName).json. Falling back to Level 1.")
+            level = try! PuzzleLevel.load(fromBundle: "Level1")
         }
         
         Board.columns = level.columns
@@ -100,7 +101,7 @@ struct ContentView: View {
                                     .multilineTextAlignment(.center)
                             }
                             .padding(.horizontal, 90)
-                                                        .multilineTextAlignment(.center)
+                            .multilineTextAlignment(.center)
                             HStack {
                                 Button {
                                     needsResetOnAppear = true
@@ -178,7 +179,7 @@ struct ContentView: View {
                                 .id(currentLevelId)
                         }
                         .padding(.bottom, 15)
-             
+                        
                         // undo and solution buttons
                         HStack(spacing: 20) {
                             Button {
@@ -191,7 +192,7 @@ struct ContentView: View {
                             .frame(width: 59, height: 59)
                             .glassEffect()
                             .shadow(color: .black.opacity(0.25), radius: 0, x: 0, y: 4)
-
+                            
                             Button {
                                 hasGivenUp = true
                                 startAnalysis()
@@ -200,7 +201,7 @@ struct ContentView: View {
                                     .animation(.easeIn(duration: 0.3).repeatCount(1, autoreverses: true), value: popupScale)
                             }
                             .disabled(mistakeCount < 5)
-                            .opacity(mistakeCount < 5 ? 0.5 : 1.0) 
+                            .opacity(mistakeCount < 5 ? 0.5 : 1.0)
                         }
                         .padding(.bottom, 20)
                         .shadow(color: .black.opacity(0.25), radius: 0, x: 0, y: 4)
@@ -214,7 +215,7 @@ struct ContentView: View {
                 SolutionView(
                     stepTitle: getEvaluationTitle(evaluation: moveEvaluation, index: analysisIndex),
                     stepFeedback: feedbacktext,
-                    isAnalysisComplete: analysisIndex >= analysisSteps.count,  
+                    isAnalysisComplete: analysisIndex >= analysisSteps.count,
                     hasGivenUp: hasGivenUp,
                     onMapTapped: {
                         needsResetOnAppear = true
@@ -229,36 +230,46 @@ struct ContentView: View {
             }
         }
         // winning card overlay
-                .overlay (alignment: .center) {
-                    if currentMode == .puzzleComplete {
-                        ZStack {
-                            Color.black.opacity(0.72)
-                                .ignoresSafeArea()
-                            
-                            // Insert your custom popup here!
-                            WinPopUpView(
-                                onSolutionTapped: {
-                                    startAnalysis()
-                                },
-                                onNextLevelTapped: {
-                                    if hasGivenUp {
-                                        retryLevel()
+        .overlay (alignment: .center) {
+            if currentMode == .puzzleComplete {
+                ZStack {
+                    Color.black.opacity(0.72)
+                        .ignoresSafeArea()
+                    
+                    // Insert your custom popup here!
+                    WinPopUpView(
+                        onSolutionTapped: {
+                            startAnalysis()
+                        },
+                        onNextLevelTapped: {
+                            if hasGivenUp {
+                                retryLevel()
+                            } else {
+                                if currentLevelId >= 5 {
+                                    needsResetOnAppear = true
+                                    dismiss()
+                                } else {
+                                    if currentLevelId >= 5 {
+                                        needsResetOnAppear = true
+                                        dismiss()
                                     } else {
                                         needsResetOnAppear = true
                                         loadLevel(currentLevelId + 1)
                                     }
-                                },
-                                hasGivenUp: hasGivenUp
-                            )
-                            .scaleEffect(popupScale)
-                            .animation(.easeIn(duration: 0.3), value: popupScale)
-                            .onAppear {
-                                popupScale = 1
+                                }
                             }
-                        }
+                        },
+                        hasGivenUp: hasGivenUp
+                    )
+                    .scaleEffect(popupScale)
+                    .animation(.easeIn(duration: 0.3), value: popupScale)
+                    .onAppear {
+                        popupScale = 1
                     }
                 }
-    
+            }
+        }
+        
         .onAppear {
             retryLevel()
         }
@@ -314,7 +325,8 @@ struct ContentView: View {
                             currentMode = .puzzleComplete
                             feedbacktext = "Puzzle Completed!"
                             if currentLevelId >= highestUnlockedLevel {
-                                highestUnlockedLevel = currentLevelId + 1
+                                
+                                highestUnlockedLevel = min(currentLevelId + 1, 5)
                             }
                         }
                         moveEvaluation = nil
@@ -439,14 +451,14 @@ struct ContentView: View {
     
     private func nextAnalysisStep() {
         guard analysisIndex < analysisSteps.count else {
-                if hasGivenUp {
-                    retryLevel()
-                } else {
-                    needsResetOnAppear = true
-                    loadLevel(currentLevelId + 1)
-                }
-                return
+            if hasGivenUp {
+                retryLevel()
+            } else {
+                needsResetOnAppear = true
+                loadLevel(currentLevelId + 1)
             }
+            return
+        }
         let step = analysisSteps[analysisIndex]
         let move = Move(string: step.moveLAN)
         chessboardModel.game.make(move: move)
