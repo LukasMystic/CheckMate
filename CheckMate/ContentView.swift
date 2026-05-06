@@ -249,8 +249,13 @@ struct ContentView: View {
                                     needsResetOnAppear = true
                                     dismiss()
                                 } else {
-                                    needsResetOnAppear = true
-                                    loadLevel(currentLevelId + 1)
+                                    if currentLevelId >= 5 {
+                                        needsResetOnAppear = true
+                                        dismiss()
+                                    } else {
+                                        needsResetOnAppear = true
+                                        loadLevel(currentLevelId + 1)
+                                    }
                                 }
                             }
                         },
@@ -320,6 +325,7 @@ struct ContentView: View {
                             currentMode = .puzzleComplete
                             feedbacktext = "Puzzle Completed!"
                             if currentLevelId >= highestUnlockedLevel {
+                                
                                 highestUnlockedLevel = min(currentLevelId + 1, 5)
                             }
                         }
