@@ -336,6 +336,7 @@ struct ContentView: View {
                 
             } else {
                 mistakeCount += 1
+                triggerErrorHaptic()
                 if outcome.evaluation == .blunder {
                     chessboardModel.setEvaluation(.blunder, for: targetSquare)
                 } else {
@@ -350,6 +351,7 @@ struct ContentView: View {
             
         } else {
             mistakeCount += 1
+            triggerErrorHaptic()
             moveEvaluation = .mistake
             chessboardModel.setEvaluation(.mistake, for: targetSquare)
             feedbacktext = "That's not the best move. Try again"
@@ -498,6 +500,10 @@ struct ContentView: View {
             feedbacktext = currentStep.feedback
         }
     }
+    private func triggerErrorHaptic() {
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.error)
+        }
 }
 
 #Preview {
