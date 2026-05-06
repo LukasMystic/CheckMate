@@ -321,7 +321,6 @@ struct ContentView: View {
                             currentNode = next
                             feedbacktext = "Find the next best move"
                         } else {
-                            // Puzzle Finished!
                             currentMode = .puzzleComplete
                             feedbacktext = "Puzzle Completed!"
                             if currentLevelId >= highestUnlockedLevel {
