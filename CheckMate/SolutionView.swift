@@ -67,8 +67,7 @@ struct SolutionView: View {
                         .frame(width: 344, height: 344)
                         .padding(.bottom, 20)
                 }
-                
-                // Dynamic JSON Feedback block
+
                 VStack {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(stepTitle)
