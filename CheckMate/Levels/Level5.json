@@ -10,15 +10,50 @@
         "evaluation": "Brilliant!",
         "feedback": "Checkmate! The Knight jumps in and White is completely smothered."
       },
-      "b2d1": {
+      "c2a1": {
         "evaluation": "Blunder",
         "feedback": "Wrong Knight! Capturing the rook here doesn't deliver a check.",
-        "cpuReplyLAN": "c1d1"
+        "cpuReplyLAN": "c1c3"
       },
-      "d4b4": {
+      "c2b4": {
         "evaluation": "Blunder",
         "feedback": "Sacrificing your Queen loses your massive advantage.",
         "cpuReplyLAN": "a3b4"
+      },
+      "c4b3": {
+        "evaluation": "Blunder",
+        "feedback": "Sacrificing your Queen loses your massive advantage.",
+        "cpuReplyLAN": "a2b3"
+      },
+      "c4a2": {
+        "evaluation": "Blunder",
+        "feedback": "Sacrificing your Queen loses your massive advantage.",
+        "cpuReplyLAN": "b1a2"
+      },
+      "c4b4": {
+        "evaluation": "Blunder",
+        "feedback": "Sacrificing your Queen loses your massive advantage.",
+        "cpuReplyLAN": "a3b4"
+      },
+      "a4b4": {
+        "evaluation": "Blunder",
+        "feedback": "Sacrificing your Queen loses your massive advantage.",
+        "cpuReplyLAN": "a3b4"
+      },
+      "c3d2": {
+        "evaluation": "Blunder",
+        "feedback": "Sacrificing your Queen loses your massive advantage.",
+        "cpuReplyLAN": "a1c2"
+      },
+      "c3b4": {
+        "evaluation": "Blunder",
+        "feedback": "Sacrificing your Queen loses your massive advantage.",
+        "cpuReplyLAN": "a1c2"
+      },
+      "b2d1": {
+        "evaluation": "Blunder",
+        "feedback": "Sacrificing your Queen loses your massive advantage.",
+        "cpuReplyLAN": "a1c2"
       }
     }
   }

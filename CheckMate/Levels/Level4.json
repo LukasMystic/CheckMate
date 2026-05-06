@@ -1,6 +1,6 @@
 {
   "id": 4,
-  "objective": "Black to move. Find the Mate in 2.",
+  "objective": "Find the Mate in 2 for Black.",
   "columns": 4,
   "rows": 4,
   "initialFEN": "Qbqk/N1pp/PP/KB1R b - - 0 1",
@@ -14,12 +14,52 @@
           "expectedMoves": {
             "c4c3": {
               "evaluation": "Brilliant!",
-              "feedback": "Checkmate! The Queen delivers the final blow."
+              "feedback": "Checkmate! The Queen slides in and delivers the final blow."
             },
             "c4a2": {
               "evaluation": "Blunder",
-              "feedback": "You sacrificed the Queen for nothing!",
+              "feedback": "You sacrificed the Queen for nothing! The Bishop was guarding that.",
               "cpuReplyLAN": "b1a2"
+            },
+            "c4c2": {
+              "evaluation": "Mistake",
+              "feedback": "Trading Queens here is like taking your foot off the gas right before the finish line.",
+              "cpuReplyLAN": "b1c2"
+            },
+            "c4c1": {
+              "evaluation": "Mistake",
+              "feedback": "Why trade when you have them on the ropes? Keep the attacking pieces on the board.",
+              "cpuReplyLAN": "d1c1"
+            },
+            "b4a3": {
+              "evaluation": "Mistake",
+              "feedback": "A Queen trade lets White breathe a massive sigh of relief. Don't let them off the hook!",
+              "cpuReplyLAN": "a4a3"
+            },
+            "b4c3": {
+              "evaluation": "Mistake",
+              "feedback": "You traded your best attacking piece away for a worse endgame.",
+              "cpuReplyLAN": "b2c1"
+            },
+            "b4d2": {
+              "evaluation": "Mistake",
+              "feedback": "You let White off the hook! Now they can defend comfortably.",
+              "cpuReplyLAN": "a4c4"
+            },
+            "d3d2": {
+              "evaluation": "Mistake",
+              "feedback": "Moving the pawn ignores the devastating attack you had lined up.",
+              "cpuReplyLAN": "a3c4"
+            },
+            "d3d1": {
+              "evaluation": "Mistake",
+              "feedback": "Too slow! White will consolidate and crush you now.",
+              "cpuReplyLAN": "a3c4"
+            },
+            "c4b3": {
+              "evaluation": "Mistake",
+              "feedback": "You just walked your Queen into a completely guarded square.",
+              "cpuReplyLAN": "a2b3"
             }
           }
         }
@@ -29,10 +69,30 @@
         "feedback": "Sacrificing the Queen early doesn't work here. The Bishop guards a2.",
         "cpuReplyLAN": "b1a2"
       },
-      "c4a4": {
+      "c4b3": {
         "evaluation": "Mistake",
-        "feedback": "Trading Queens relieves all the pressure on White.",
-        "cpuReplyLAN": "a1a4"
+        "feedback": "Trading Queens relieves all the pressure on White. Keep the tension!",
+        "cpuReplyLAN": "a2b3"
+      },
+      "c3c2": {
+        "evaluation": "Mistake",
+        "feedback": "Pushing the pawn closes the position and ruins your attack.",
+        "cpuReplyLAN": "a3c4"
+      },
+      "c3c1": {
+        "evaluation": "Mistake",
+        "feedback": "You just hung your Queen for absolutely nothing. A tragedy.",
+        "cpuReplyLAN": "a3c4"
+      },
+      "d3d2": {
+        "evaluation": "Mistake",
+        "feedback": "Ignoring the main threat allows White to escape entirely.",
+        "cpuReplyLAN": "a3c4"
+      },
+      "b4a3": {
+        "evaluation": "Mistake",
+        "feedback": "Trading Queens is a massive favor to the defending side.",
+        "cpuReplyLAN": "d1d3"
       }
     }
   }

@@ -8,31 +8,71 @@
     "expectedMoves": {
       "b1d3": {
         "evaluation": "Brilliant!",
-        "feedback": "Brilliant! You sacrifice the Queen to lure the King into a mating net.",
+        "feedback": "Brilliant! You sacrifice the Queen to lure the King right into your mating net.",
         "cpuReplyLAN": "d4d3",
         "nextNode": {
           "expectedMoves": {
             "c1d1": {
               "evaluation": "Best Move",
-              "feedback": "Checkmate! The Rook cuts off the d-file, and the Bishop and Knight cover escapes."
+              "feedback": "Checkmate! The Rook cuts off the d-file, and your minor pieces perfectly cover the escapes."
+            },
+            "c1c3": {
+              "evaluation": "Mistake",
+              "feedback": "You just gift-wrapped your Rook for the enemy. Tragic.",
+              "cpuReplyLAN": "c4c3"
+            },
+            "c1c2": {
+              "evaluation": "Blunder",
+              "feedback": "Ah, the rare 'self-mate'. You just hung your own monarch!",
+              "cpuReplyLAN": "a2a3"
+            },
+            "c1b1": {
+              "evaluation": "Blunder",
+              "feedback": "Did you forget which color you're playing? You just exposed your King!",
+              "cpuReplyLAN": "a2a3"
+            },
+            "c1a1": {
+              "evaluation": "Mistake",
+              "feedback": "You slid your Rook to the corner just to hang it. The King escapes.",
+              "cpuReplyLAN": "b2a1"
             }
           }
         }
       },
       "b1a1": {
         "evaluation": "Mistake",
-        "feedback": "The bishop captures your queen. Then the pawn drops.",
-        "cpuReplyLAN": "b2a1,d3d1"
+        "feedback": "The bishop captures your queen. A royal tragedy.",
+        "cpuReplyLAN": "b2a1"
       },
       "b1a2": {
         "evaluation": "Mistake",
-        "feedback": "The bishop ignores your queen and takes your rook.",
-        "cpuReplyLAN": "b2c1,d3c4"
+        "feedback": "The bishop ignores your queen and munches your rook instead. Ouch.",
+        "cpuReplyLAN": "b2c1"
       },
       "b1b2": {
         "evaluation": "Mistake",
-        "feedback": "The pawn structure crushes your attack.",
+        "feedback": "Black's pawn structure completely crushes your attack here.",
         "cpuReplyLAN": "c3b2"
+      },
+      "b1c2": {
+        "evaluation": "Blunder",
+        "feedback": "You just hung your own King! Checkmate is supposed to happen to the *other* guy.",
+        "cpuReplyLAN": "a2a3"
+      },
+      "c1c2": {
+        "evaluation": "Blunder",
+        "feedback": "Illegal or fatal! You've successfully checkmated yourself.",
+        "cpuReplyLAN": "a2a3"
+      },
+      "c1c3": {
+        "evaluation": "Mistake",
+        "feedback": "You just donated your Queen to charity. Very noble, very losing.",
+        "cpuReplyLAN": "d3b1"
+      },
+      "c1d1": {
+        "evaluation": "Mistake",
+        "feedback": "Too weak, too slow! The enemy king is ordering a pizza while you set up.",
+        "cpuReplyLAN": "a2b1"
       }
     }
   }
